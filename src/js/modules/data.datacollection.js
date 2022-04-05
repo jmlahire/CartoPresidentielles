@@ -6,7 +6,7 @@ const d3=Object.assign({},d3Array,d3Fetch,d3Dsv);
 
 class DataCollection {
 
-    static options = { delimiter: ',', mapper: d3.autoType, primary:undefined };
+    static type='DataCollection';
 
     constructor(id) {
         this.id = id;
@@ -38,23 +38,42 @@ class DataCollection {
         return (this.datasetMap)?this.datasetDict:this.exportToMap();
     }
 
-    primaryKey(keyName){
-        this.primaryKey=keyName;
-        return this;
+    get primary(){
+        return this._primary || 'id';
+    }
+
+    set primary(keyName){
+        this._primary=keyName;
     }
 
     /**
-     * Charge les données
-     * @returns {Promise<unknown>}
+     * Définit la clé primaire (on peut aussi directement donner une valeur à this.primary)
+     * @param {String} keyName          Nom de la clé
+     * @returns {DataCollection}
+     */
+    setPrimary(keyName){
+        this._primary=keyName;
+        return this;
+    }
+
+
+    /**
+     * Charge les données, disponibles quand la promesse this.ready sera résolue
+     * @param file
+     * @param {Object}      options              : options
+     * @param {String}      options.primary      : clé primaire
+     * @param {String}      options.delimiter    : délimiteur du csv
+     * @param {Function}    options.mapper       : mapper
+     * @returns {DataCollection}
      */
     load(file,options={}) {
         this.ready=new Promise((resolve, reject) => {
-            this.file=file;
-            this.options={...DataCollection.options,...options};
-            d3.text(`${this.file}`)
+            options={...{ delimiter: ',', mapper: d3.autoType, primary:undefined },...options};
+            d3.text(`${file}`)
                 .then((dataset) => {
-                    dataset = d3.dsvFormat(this.options.delimiter).parse(dataset);
-                    dataset = dataset.map(this.options.mapper);
+                    dataset = d3.dsvFormat(options.delimiter).parse(dataset);
+                    if (options.mapper) dataset = dataset.map(options.mapper);
+                    if (options.primary) this.primary=options.primary;
                     this.push(dataset);
                     resolve(this);
                 });
@@ -107,51 +126,49 @@ class DataCollection {
     }
 
     /**
-     * Renvoie un objet Dictionnaire ayant pour clé primaryKey (
-     * @param primaryKey : String : si undefined, cherche une propriété this.primary, sinon défini à 'id' par défaut
+     * Renvoie un objet Dictionnaire ayant pour clé primary (
+     * @param {String} primary      : Clé primaire (si manquant, prend la clé définie dans l'instance)
      * @returns {*} : Map
      */
-    exportToDict(primaryKey) {
-        return this._export(primaryKey, 'Dictionary');
+    exportToDict(primary) {
+        primary = primary || this.primary;
+        return this._export(primary, 'Dictionary');
     }
 
     /**
-     * Renvoie un objet Map ayant pour clé primaryKey (
-     * @param primaryKey : String : si undefined, cherche une propriété this.primary, sinon défini à 'id' par défaut
+     * Renvoie un objet Map ayant pour clé primary (
+     * @param {String} primary      : Clé primaire (si manquant, prend la clé définie dans l'instance)
      * @returns {*} : Map
      */
-    exportToMap(primaryKey) {
-        return this._export(primaryKey, 'Map');
+    exportToMap(primary) {
+        primary = primary || this.primary;
+        return this._export(primary, 'Map');
     }
 
     /**
      * Méthode appelée par exportToMap et exportToDict
-     * @param primaryKey
-     * @param type
+     * @param {String} primary     : Clé primaire
+     * @param {String} type        : Dictionary ou Map
      * @returns {unknown}
      * @private
      */
-    _export(primaryKey, type = 'Dictionary') {
-        primaryKey = (typeof primaryKey !== 'undefined') ? primaryKey :
-            (this.hasOwnProperty('primary')) ? this.primary :
-                'id';
+    _export(primary, type = 'Dictionary') {
         const cloneRow = (row) => {
-            //console.log(row);
             let clonedRow = Object.assign({}, row);
-            delete (clonedRow[primaryKey]);
+            delete (clonedRow[primary]);
             return clonedRow;
         }
 
 
         if (type.toLowerCase() === 'map') {
             this.datasetMap=new Map();
-            this.toGroups(primaryKey)
+            this.toGroups(primary)
                 .forEach( d => this.datasetMap.set(d[0],d[1]) );
             return this.datasetMap;
         }
         else if (type.toLowerCase() ==='dictionary') {
             this.datasetDict=new Object();
-            this.toGroups(primaryKey)
+            this.toGroups(primary)
                 .forEach( d => this.datasetDict[d[0]]=d[1] );
             return this.datasetDict;
         }
@@ -195,14 +212,14 @@ class DataCollection {
 
     /**
      * Cherche et renvoie la ligne de données où key=value
-     * @param key
-     * @param value
+     * @param {String|*} key        Clé ou valeur s'il n'y a qu'un seul argument (dans ce cas la clé primaire est utilisée)
+     * @param {*} value             Valeur recherchée
      * @returns {*}
      */
     find(key, value) {
         if (arguments.length===1) {
             value=key;
-            key = this.options.primary || 'id';
+            key = this.primary;
         }
         try {
             return (this.findAll(key,value)[0]);

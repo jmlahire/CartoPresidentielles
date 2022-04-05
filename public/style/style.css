@@ -1,56 +1,249 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap");
-.draggable {
-  cursor: move;
+.HtmlMenuSelect form {
+  flex: 1 0 auto;
+}
+.HtmlMenuSelect a {
+  flex: 1 0 auto;
+  align-self: flex-end;
+  text-align: right;
+  margin: 0 !important;
+  padding: 0 0.2rem;
+  text-decoration: none;
+  color: #333 !important;
 }
 
-article#main {
-  margin: 0 auto;
-  max-width: 800px;
-  font-family: "Roboto Serif", serif;
+._Panel h3 {
+  text-align: center;
 }
-article#main .title, article#main subtitle, article#main intertitle {
+
+#boutonsCandidats figure {
+  max-width: 100px;
+  order: 2;
+}
+#boutonsCandidats figure._13, #boutonsCandidats figure._14 {
+  max-width: none;
+  order: 1;
+  flex-basis: 50%;
+  padding: 10px 0;
+}
+#boutonsCandidats figure._13 img, #boutonsCandidats figure._14 img {
+  max-width: 100px;
+}g._Layer path.area {
+  stroke: #fff;
+}@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap");
+h1, h2, h3, h4, h5, h6 {
   font-family: "Roboto", sans-serif;
+  margin-top: 0;
+  color: "#333";
 }
-article#main select {
-  width: 15rem;
+
+p, input, textarea, select, a, li {
+  color: "#888";
+}
+
+div {
+  position: relative;
 }
 
 svg {
   display: block;
   width: 100%;
 }
-svg g.layer path {
+
+.no_highlights {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  transition: background 0.5s ease-out;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #efefef;
+}
+
+img {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+button:focus {
+  outline: 0 !important;
+}._Panel {
+  position: absolute;
+}
+._Panel > div {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+._Panel div.handle {
+  border: 1px solid #333;
+  border-right: none;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+._Panel div.handle span {
+  display: inline-block;
+  transition: all 500ms ease-in-out;
+  margin-left: 20%;
+}
+._Panel div.handle:hover span {
+  color: #000;
+}
+._Panel div.content {
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  background: #fcfcfc;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+._Panel.right {
+  right: 0;
+}
+._Panel.right div.handle {
+  border-radius: 10px 0 0 10px;
+}
+._Panel.right.folded div.handle span {
+  transform: rotate(0deg);
+}
+._Panel.right.unfolded div.handle span {
+  transform: rotate(180deg);
+}._breadcrumb ul {
+  white-space: nowrap;
+  list-style: none;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+._breadcrumb li:first-child {
+  padding-left: 0;
+}
+._breadcrumb li + li::before {
+  content: ">";
+  font-weight: bold;
+  margin: 0 0.5rem;
+}
+._breadcrumb a {
+  color: #333;
+  font-weight: bold;
+}
+._breadcrumb select {
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.2rem;
+}
+._breadcrumb select:focus {
+  border: 3px solid #333;
+}
+._breadcrumb select.selected {
+  border: 1px solid #ccc;
+}.title, .subtitle, .intertitle {
+  display: block;
+  width: 100%;
+}
+
+.title.right, .subtitle.right {
+  text-align: right;
+}
+
+.title.center, .subtitle.center {
+  text-align: right;
+}._Buttons {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+._Buttons.round img.photo {
+  border-radius: 50%;
+}
+._Buttons.round img.check {
+  position: absolute;
+  top: 6%;
+  right: 10%;
+  width: 20%;
+  opacity: 0;
+}
+._Buttons.round .selected img {
+  opacity: 1;
+}
+._Buttons.square img.photo {
+  border-radius: 10%;
+  filter: grayscale(1);
+}
+._Buttons.square img.check {
+  display: none;
+}
+._Buttons.square .selected img.photo {
+  filter: grayscale(0);
+  opacity: 1;
+}
+._Buttons figure {
+  flex: 0 0 30%;
+  position: relative;
+  margin: 0 0 1rem 0 !important;
+}
+._Buttons figure img {
+  transition: all 500ms ease-in-out;
+}
+._Buttons figure figcaption {
+  line-height: 1;
+  font-style: normal !important;
+}
+._Buttons figure > img.photo {
+  opacity: 0.6;
+  width: 70%;
+  border: 3px solid white;
+  cursor: pointer;
+}
+._Buttons figure > img.photo:hover {
+  opacity: 1;
+}
+._Buttons figure.selected figcaption {
+  font-weight: bold;
+}@keyframes blink {
+  0% {
+    stroke-width: 1;
+  }
+  50% {
+    stroke-width: 2;
+  }
+  100% {
+    stroke-width: 1;
+  }
+}
+._Layer path.area {
   fill: #fff;
-  stroke: rgba(0, 0, 0, 0.05);
+  stroke: #ccc;
   stroke-width: 1;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
-svg g.layer path.clickable {
+._Layer path.area.clickable {
   transition: all 200ms ease-in-out;
   pointer-events: visiblePainted;
   cursor: pointer;
 }
-svg g.layer path.clickable:hover {
+._Layer path.area.clickable:hover {
   stroke-width: 1;
 }
-svg g.layer path.selected {
-  animation: blink 1s linear infinite;
+._Layer path.area.selected {
+  animation: blink 1s linear 10s;
 }
-@keyframes blink {
-  0% {
-    stroke-width: 1;
-  }
-  50% {
-    stroke-width: 4;
-  }
-  100% {
-    stroke-width: 1;
-  }
-}
-svg g.labels text.label {
+._Layer g.labels text.label {
   transition: opacity 500ms ease-in-out;
   fill: #fff;
   text-anchor: middle;
@@ -62,87 +255,6 @@ svg g.labels text.label {
   vector-effect: non-scaling-stroke;
   opacity: 1;
 }
-svg g.labels text.label.invisible {
+._Layer g.labels text.label.invisible {
   opacity: 0;
-}
-svg g#departements path {
-  stroke: #aaa;
-}
-svg g#departements path.clickable:hover {
-  fill: #eee;
-}
-svg g.communes path.clickable {
-  stroke-width: 0;
-}
-
-.HtmlMenuSelect {
-  padding-bottom: 1rem;
-}
-
-.HtmlContentBox {
-  position: absolute;
-  top: 500px;
-  left: 0;
-  max-width: 75%;
-  max-height: 25rem;
-  background: white;
-  border: thin solid #aaa;
-  border-radius: 10px;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-  padding-bottom: 3rem;
-  display: none;
-}
-.HtmlContentBox h2 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 2.5rem;
-  width: 100%;
-  border-radius: 10px 10px 0 0;
-  padding: 0.5rem 1rem;
-  text-transform: uppercase;
-  background: #efefef;
-}
-.HtmlContentBox p.close {
-  font-family: "Roboto", sans-serif;
-  transition: all 500ms ease-in-out;
-  cursor: pointer;
-  color: #aaa;
-  font-weight: bold;
-  content: "X";
-  text-align: center;
-  position: absolute;
-  width: 1.2rem;
-  height: 1.2rem;
-  top: 0;
-  right: 0;
-}
-.HtmlContentBox p.close:hover {
-  color: #888;
-}
-.HtmlContentBox .inner {
-  position: relative;
-  top: 2.5rem;
-  left: 0;
-  min-height: 6.5rem;
-  max-height: 16.5rem;
-  padding: 0.5rem 1rem;
-  overflow: auto;
-}
-.HtmlContentBox table tr > td:first-child {
-  font-weight: bold;
-}
-.HtmlContentBox .content table tr:last-child td {
-  border: none;
-}
-.HtmlContentBox ::-webkit-scrollbar {
-  width: 6px;
-}
-.HtmlContentBox ::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background: #333;
-  transition: background 0.5s ease-out;
-}
-.HtmlContentBox ::-webkit-scrollbar-track {
-  background: #efefef;
 }

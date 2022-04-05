@@ -1,0 +1,13 @@
+id,nom,prenom,parti,sigle,img,couleur,min,max,moy
+1,ARTHAUD,Nathalie,Lutte ouvrière,LO,arthaud,#BC1A1A,17,34,25
+2,ROUSSEL,Fabien,Parti communiste,PCF,roussel,#FF0000,17,34,25
+3,MACRON,Emmanuel,La République en Marche,LREM,macron,#FF8000,17,34,25
+4,LASSALLE,Jean,Résistons,,lassalle,#9A7D24,17,34,25
+5,LE PEN,Marine,Rassemblement national,RN,lepen,#1C4385,17,34,25
+6,ZEMMOUR,Éric,Reconquête,,zemmour,#071868,17,34,25
+7,MÉLENCHON,Jean-Luc,France insoumise,LFI,melenchon,#FB6969,17,34,25
+8,HIDALGO,Anne,Parti socialiste,PS,hidalgo,#F76E9E,17,34,25
+9,JADOT,Yannick,Europe-Ecologie Les Verts, Génération.s,EELV,jadot,#6EF000,17,34,25
+10,PÉCRESSE,Valérie,Les Républicains,LR,pecresse,#2B99FC,17,34,25
+11,POUTOU,Philippe,Nouveau parti anticapitaliste,NPA,poutou,#E54343,17,34,25
+12,DUPONT-AIGNAN,Nicolas,Debout la France,DLF,dupontaignan,#042FA0,17,34,25

@@ -1,6 +1,6 @@
 import * as d3Selection from 'd3-selection'
-import {idGenerator} from './fn.idgenerator.js'
-import {Queue} from './fn.queue.js'
+import {idGenerator,componentsRegister} from './common.components.js'
+import {Queue} from './common.queue.js'
 
 const d3=Object.assign({},d3Selection);
 
@@ -11,22 +11,38 @@ class HtmlComponent extends Queue{
 
     /**
      * Constructeur
-     * @param id
+     * @param id {String} : identifiant du composant
      */
     constructor(id) {
         super();
-        this.id = id || idGenerator().next().value;
-        this.state = { visible: undefined };
+        this.id = id || idGenerator(this);
+        componentsRegister.add(this);
+        this.state = { display: undefined, visibility: undefined };
     }
 
+    /**
+     * Renvoie le conteneur extérieur du composant (par défaut, renvoie vers le conteneur unique)
+     * @returns {d3.selection}
+     */
     get outerContainer(){
         return this.container;
     }
 
+    /**
+     * Renvoie le conteneur intérieur du composant (par défaut, renvoie vers le conteneur unique)
+     * @returns {d3.selection}
+     */
     get innerContainer(){
         return this.container;
     }
 
+    /**
+     * Crée un élément dans le composant
+     * @param tag {String}: tag (div par défaut)
+     * @param id {String} : id (optionnel)
+     * @param classes {String} : classe (optionnel)
+     * @returns {null|*} : selection d3
+     */
     append(tag='div', id, classes) {
         return (!this.container) ?  null:
                                     this.container
@@ -35,19 +51,35 @@ class HtmlComponent extends Queue{
                                         .attr('class',classes);
     }
 
+    /**
+     * Insère le composant dans le dom
+     * @param parent {HtmlComponent|d3.selection|String}: parent dans lequel insérer le composant. Au choix: objet hérité de HtmlComponent | sélecteur | id du parent | selection d3
+     * @returns {HtmlComponent}
+     */
     appendTo(parent) {
+        //Impossible d'insérer ce qui n'a pas encore été créé
         if (!this.outerContainer)
-            console.warn(`Pas de conteneur défini pour ${this.id}`);
+            console.warn(`Aucun élément dans le DOM correspondant à ${this.id}: impossible de l'insérer`);
+        //Determination du type de parent
         else {
+            //Composant
             if (parent instanceof HtmlComponent) {
                 this.parentComponent=parent;
-                this.parentContainer=parent.container;
+                this.parentContainer=parent.container || parent.innerContainer;
             }
-            else if (typeof parent === 'string')
+            //Selection d3
+            else if (parent instanceof d3.selection)
+                this.parentContainer=parent;
+            //Id
+            else if (typeof parent === 'string' && parent.match(/[#\.]/g))
                 this.parentContainer=d3.select(`${parent}`);
+            //Selecteur
+            else if (typeof parent === 'string')
+                this.parentContainer=d3.select(`#${parent}`);
+            //Sinon -> body
             else
                 this.parentContainer = d3.select('body');
-
+            //Insertion dans le DOM
             try {
                 this.parentContainer.append(() => this.outerContainer.node());
             } catch (error) {
@@ -59,7 +91,8 @@ class HtmlComponent extends Queue{
 
 
 
-    fadeOut(options= { duration:500,delay:0 } ) {
+    fadeOut(options= { } ) {
+        options={...{duration:500,delay:0,type:'display'},...options};
         this.enqueue( () => new Promise((resolve, reject) => {
             this.outerContainer
                     .transition()
@@ -67,7 +100,8 @@ class HtmlComponent extends Queue{
                     .delay(options.delay)
                     .style('opacity',0)
                     .on('end', ()=> {
-                        this.hide();
+                        if (options.type.display==='visibility') this.invisiblify();
+                        else this.hide()
                         resolve( {msg:'hidden',target:this });
                     });
             }
@@ -75,28 +109,42 @@ class HtmlComponent extends Queue{
         return this;
     }
 
-    fadeIn(options= { duration:500,delay:0 }) {
+    fadeIn(options= {  }) {
+        options={...{duration:500,delay:0,type:'display'},...options};
         this.enqueue( () => new Promise((resolve, reject) => {
             this.outerContainer
+                .style('display','block')
                 .transition()
                 .duration(options.duration)
                 .delay(options.delay)
                 .style('opacity',1)
-                .on('start', this.show.bind(this) )
+               // .on('start', this.outerContainer.style('display','block') )
                 .on('end', () => resolve( {msg:'showed',target: this }) );
         }));
         return this;
     }
 
     show(){
-        this.state.visible=true;
-        this.outerContainer.style('display','block').style('opacity',1);
+        this.state.display=true;
+        this.outerContainer.style('display','initial').style('opacity',1);
         return this;
     }
 
     hide(){
-        this.state.visible=false;
-        this.outerContainer.style('display','none');
+        this.state.display=false;
+        this.outerContainer.style('visibility','collapse');
+        return this;
+    }
+
+    invisiblify(){
+        this.state.visibility=false;
+        this.outerContainer.style('visiblity','hidden');
+        return this;
+    }
+
+    visiblifu(){
+        this.state.visibility=true;
+        this.outerContainer.style('visibility','visible');
         return this;
     }
 
@@ -108,41 +156,13 @@ class HtmlComponent extends Queue{
         this.outerContainer.raise();
         return this;
     }
-}
 
-class TitleComponent extends HtmlComponent{
-    constructor(id, options ={ tag:'h1', class:'title'} ) {
-        super(id);
-        this.container=d3.create(options.tag)
-                            .attr('id',id)
-                            .classed(options.class,true);
-    }
-    text(string='', options= { format: 'text' }){
-        if (options.format==='html') this.container.html(string);
-        else this.container.text(string);
+    empty(){
+        this.innerContainer.selectAll('*').remove();
         return this;
     }
-    delete(){
-        return this.text();
-    }
-}
-
-class Title extends TitleComponent{
-    constructor(id){
-        super(id,{ tag:'h1', class:'title'});
-    }
-}
-class SubTitle extends TitleComponent{
-    constructor(id){
-        super(id,{ tag:'h2', class:'subtitle'});
-    }
-}
-class InterTitle extends TitleComponent{
-    constructor(id){
-        super(id,{ tag:'h4', class:'intertitle'});
-    }
 }
 
 
 
-export {HtmlComponent,Title,SubTitle,InterTitle}
+export {HtmlComponent}

@@ -1,9 +1,11 @@
+import './../../style/htmlSelect.scss'
+
 import * as d3Selection from 'd3-selection'
 import * as d3Array from 'd3-array'
 import * as d3Dispatch from 'd3-dispatch'
 import {HtmlComponent} from "./html.component";
 
-const d3=Object.assign({},d3Selection,d3Array,d3Dispatch);
+const d3=Object.assign({},d3Selection,d3Dispatch);
 
 class HtmlMenuSelect extends HtmlComponent{
 
@@ -17,10 +19,11 @@ class HtmlMenuSelect extends HtmlComponent{
         this.container=d3.create('div')
             .attr('id',this.id)
             .classed(HtmlMenuSelect.type,true);
-        this.container.append('label')
+        this.form=this.container.append('form');
+        this.form.append('label')
                                 .attr('for',this.id)
                                 .text(this.options.label);
-        this.selectNode = this.container.append('select')
+        this.selectNode = this.form.append('select')
                                 .attr('id',this.id)
                                 .attr('name',this.id);
         if (this.options.placeHolder)

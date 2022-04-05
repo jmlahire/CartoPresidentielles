@@ -1,0 +1,75 @@
+._Buttons {
+
+  margin-top:1rem;
+  display:flex;
+  flex-wrap: wrap;
+  justify-content:space-around;
+
+
+  &.round {
+    img.photo {
+      border-radius:50%;
+    }
+    img.check {
+      position: absolute;
+      top: 6%;
+      right: 10%;
+      width: 20%;
+      opacity:0;
+    }
+
+    .selected img {
+      opacity:1;
+    }
+
+  }
+
+  &.square {
+    img.photo {
+      border-radius:10%;
+      filter:grayscale(1);
+    }
+    img.check{
+      display:none;
+    }
+    .selected img.photo{
+      filter:grayscale(0);
+      opacity:1;
+    }
+
+  }
+
+  figure {
+
+      flex:0 0 30%;
+      position:relative;
+      margin:0 0 1rem 0!important;
+
+    img {
+      transition: all 500ms ease-in-out;
+    }
+    figcaption {
+      line-height:1;
+      font-style:normal!important;
+    }
+
+    &>img.photo {
+      opacity:.6;
+      width:70%;
+      border:3px solid white;
+      cursor:pointer;
+    }
+    &>img.photo:hover{
+      opacity:1;
+    }
+
+
+
+
+
+    &.selected figcaption{
+      font-weight:bold;
+    }
+  }
+
+}
