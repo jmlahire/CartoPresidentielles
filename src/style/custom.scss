@@ -1,7 +1,21 @@
 
-.HtmlMenuSelect {
+#mainContainer {
+  max-width:800px;
+  margin:auto;
+  background:#fff;
+
+}
+
+#departements{
+  path.area.selected{
+    animation:none;
+  }
+}
 
 
+
+
+._Select {
   form {
     flex:1 0 auto;
   }

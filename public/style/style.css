@@ -1,33 +1,8 @@
-.HtmlMenuSelect form {
-  flex: 1 0 auto;
-}
-.HtmlMenuSelect a {
-  flex: 1 0 auto;
-  align-self: flex-end;
-  text-align: right;
-  margin: 0 !important;
-  padding: 0 0.2rem;
-  text-decoration: none;
-  color: #333 !important;
+body {
+  background: #333;
 }
 
-._Panel h3 {
-  text-align: center;
-}
-
-#boutonsCandidats figure {
-  max-width: 100px;
-  order: 2;
-}
-#boutonsCandidats figure._13, #boutonsCandidats figure._14 {
-  max-width: none;
-  order: 1;
-  flex-basis: 50%;
-  padding: 10px 0;
-}
-#boutonsCandidats figure._13 img, #boutonsCandidats figure._14 img {
-  max-width: 100px;
-}g._Layer path.area {
+g._Layer path.area {
   stroke: #fff;
 }@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap");
 h1, h2, h3, h4, h5, h6 {
@@ -76,6 +51,45 @@ img {
 
 button:focus {
   outline: 0 !important;
+}#mainContainer {
+  max-width: 800px;
+  margin: auto;
+  background: #fff;
+}
+
+#departements path.area.selected {
+  animation: none;
+}
+
+._Select form {
+  flex: 1 0 auto;
+}
+._Select a {
+  flex: 1 0 auto;
+  align-self: flex-end;
+  text-align: right;
+  margin: 0 !important;
+  padding: 0 0.2rem;
+  text-decoration: none;
+  color: #333 !important;
+}
+
+._Panel h3 {
+  text-align: center;
+}
+
+#boutonsCandidats figure {
+  max-width: 100px;
+  order: 2;
+}
+#boutonsCandidats figure._13, #boutonsCandidats figure._14 {
+  max-width: none;
+  order: 1;
+  flex-basis: 50%;
+  padding: 10px 0;
+}
+#boutonsCandidats figure._13 img, #boutonsCandidats figure._14 img {
+  max-width: 100px;
 }._Panel {
   position: absolute;
 }
@@ -117,48 +131,57 @@ button:focus {
 }
 ._Panel.right.unfolded div.handle span {
   transform: rotate(180deg);
-}._breadcrumb ul {
-  white-space: nowrap;
-  list-style: none;
-  align-items: flex-start;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  margin: 0.5rem 0;
-  padding: 0;
+}._ContentBox {
+  position: absolute;
+  top: 500px;
+  left: 0;
+  min-width: 10rem;
+  max-width: 75%;
+  min-height: 5rem;
+  max-height: 25rem;
+  background: white;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+  padding-bottom: 3rem;
+  display: none;
 }
-._breadcrumb li:first-child {
-  padding-left: 0;
-}
-._breadcrumb li + li::before {
-  content: ">";
-  font-weight: bold;
-  margin: 0 0.5rem;
-}
-._breadcrumb a {
-  color: #333;
-  font-weight: bold;
-}
-._breadcrumb select {
-  padding: 0.1rem 0.2rem;
-  border-radius: 0.2rem;
-}
-._breadcrumb select:focus {
-  border: 3px solid #333;
-}
-._breadcrumb select.selected {
-  border: 1px solid #ccc;
-}.title, .subtitle, .intertitle {
-  display: block;
+._ContentBox h2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2.5rem;
   width: 100%;
+  border-radius: 5px 5px 0 0;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  background: #efefef;
+  cursor: default;
 }
-
-.title.right, .subtitle.right {
-  text-align: right;
+._ContentBox h2.draggable {
+  cursor: grab;
 }
-
-.title.center, .subtitle.center {
-  text-align: right;
+._ContentBox h2.dragged {
+  cursor: move !important;
+}
+._ContentBox img.close {
+  transition: all 500ms ease-in-out;
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+._ContentBox .inner {
+  position: relative;
+  top: 2.5rem;
+  left: 0;
+  min-height: 6.5rem;
+  max-height: 16.5rem;
+  padding: 0.5rem 1rem;
+  overflow: auto;
 }._Buttons {
   margin-top: 1rem;
   display: flex;
@@ -212,12 +235,55 @@ button:focus {
 }
 ._Buttons figure.selected figcaption {
   font-weight: bold;
+}._Breadcrumb {
+  height: 2rem;
+}
+._Breadcrumb ul {
+  white-space: nowrap;
+  list-style: none;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0.5rem 0;
+  padding: 0;
+}
+._Breadcrumb li:first-child {
+  padding-left: 0;
+}
+._Breadcrumb li + li::before {
+  content: ">";
+  font-weight: bold;
+  margin: 0 0.5rem;
+}
+._Breadcrumb a, ._Breadcrumb option[selected] {
+  color: #333;
+  font-weight: bold;
+}
+._Breadcrumb select {
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.2rem;
+  border: 1px solid #333;
+}
+._Breadcrumb select.selected {
+  border: 1px solid #eee;
+}.title, .subtitle, .intertitle {
+  display: block;
+  width: 100%;
+}
+
+.title.right, .subtitle.right {
+  text-align: right;
+}
+
+.title.center, .subtitle.center {
+  text-align: right;
 }@keyframes blink {
   0% {
     stroke-width: 1;
   }
   50% {
-    stroke-width: 2;
+    stroke-width: 4;
   }
   100% {
     stroke-width: 1;
@@ -241,7 +307,7 @@ button:focus {
   stroke-width: 1;
 }
 ._Layer path.area.selected {
-  animation: blink 1s linear 10s;
+  animation: blink 1s linear infinite;
 }
 ._Layer g.labels text.label {
   transition: opacity 500ms ease-in-out;

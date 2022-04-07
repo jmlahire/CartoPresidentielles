@@ -2,14 +2,14 @@ import '../style/main.scss'
 import '../style/custom.scss'
 import '../style/dev.scss'
 
-import {DataCollection} from "./modules/data.datacollection";
-import {Title} from "./modules/html.content.title";
-import {HtmlNavigationBreadcrumb} from "./modules/html.navigation.breadcrumb";
-import {HtmlMenuButtons} from "./modules/html.menu.buttons";
-import {HtmlContentBox} from "./modules/html.content.box";
-import {HtmlPanel} from "./modules/html.panel.js";
-import {SvgMapComposition} from './modules/svg.map.composition';
-import {SvgMapLayer} from './modules/svg.map.layer';
+import {DataCollection} from "./modules/data/datacollection";
+import {Title} from "./modules/html/content.text";
+import {NavBreadcrumb} from "./modules/html/nav.breadcrumb";
+import {NavButtons} from "./modules/html/nav.buttons";
+import {ContentBox} from "./modules/html/content.box";
+import {Panel} from "./modules/html/panel.js";
+import {MapComposition} from './modules/svg/map.composition';
+import {MapLayer} from './modules/svg/map.layer';
 
 import * as d3Array from 'd3-array'
 import * as d3Scale from 'd3-scale'
@@ -29,7 +29,7 @@ const d3=Object.assign({},d3Array,d3Interpolate,d3Scale);
  */
 const dataMapperCom = (row) => {
     for (const [key, value] of Object.entries(row)) {
-        row[key] = (['dep','insee','com'].includes(key)) ? row[key] : parseFloat(row[key]);
+        row[key] = (['dep','insee','nom'].includes(key)) ? row[key] : parseFloat(row[key]);
     }
     return row;
 }
@@ -41,15 +41,29 @@ const dataMapperCom = (row) => {
  */
 const dataMapperDep = (row) => {
     for (const [key, value] of Object.entries(row)) {
-        row[key] = (key==='id') ? row[key] : parseFloat(row[key]);
+        if (key.substring(0, 2)==='nb' || key==='tncc' || key==='reg_insee') row[key]=parseInt(row[key]);
+        else if (key.substring(0, 4)==='voix' || key==='participation') row[key]=parseFloat(row[key]);
+    }
+    return row;
+}
+
+/**
+ * Mapper pour le fichier candidats
+ * @param row
+ * @returns {*}
+ */
+const dataMapperCand = (row) => {
+    for (const [key, value] of Object.entries(row)) {
+        row[key] = (['id', 'dep_min', 'dep_max', 'dep_moy','dep_med', 'com_min', 'com_max', 'com_moy','com_med','fr_moy'].includes(key)) ? parseFloat(row[key]) : row[key];
     }
     return row;
 }
 
 
-
-
-
+/**
+ * Zoome sur un departement
+ * @param insee
+ */
 const zoomToDept= (insee) => {
     appBox.hide();
     appPanel.fold();
@@ -57,6 +71,7 @@ const zoomToDept= (insee) => {
     if (insee){
         mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
         const candidat = dataCandidats.find(global.candidat);
+      //  console.log(appNavigator.level(1));
         //Cas A : Carte et données à charger
         if (!mapCommunes[`_${insee}`]) {
 
@@ -64,32 +79,42 @@ const zoomToDept= (insee) => {
                                         .load(`../assets/data/${insee}.csv`,
                                             {   primary:'insee',
                                                 mapper: dataMapperCom });
+            dataCommunes.ready.then((v)=>{
+                mapCommunes[`_${insee}`] = new MapLayer(`_${insee}`,{ primary:'COM', secondary:'NCC', className:'communes' })
+                    .appendTo(mapContainer)
+                    .load(`../assets/geomap/${insee}.topojson`);
+                mapCommunes[`_${insee}`].exportProperties();
 
-            mapCommunes[`_${insee}`] = new SvgMapLayer(`_${insee}`,{ primary:'COM', secondary:'NCC', className:'communes' })
-                .appendTo(mapContainer)
-                .load(`../assets/geomap/${insee}.topojson`)
-                .render()
-                .join(dataCommunes,'insee')
-                .fill ( colorFactory( candidat.couleur,[15,35]),
-                    d =>  d.properties.values[0][candidat.key])
-                .labels(refPrefectures,'COM','NCCENR');
+                mapCommunes[`_${insee}`].render()
+                    .join(dataCommunes,'insee')
+                    .fill ( colorFactory2( candidat.couleur,dataCommunes.col(candidat.key)),  d =>  d.properties.extra[candidat.key])
+                    // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
+                    .labels(dataPrefectures,'COM','NCCENR');
+                mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
+            })
+//AJOUTER PROMESSE dataCommunes.ready
+
 
            // mapContainer.zoomable(true);
          }
         //Cas B : carte et données déjà chargés
         else {
             mapCommunes[`_${insee}`].fadeIn();
+          //  mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
             //mapDepartements.zoomOn(insee);
         }
 
         mapDepartements.zoomOn(insee);
-        mapCommunes[`_${insee}`].dispatch.on('click',(param)=>{
+
+
+            /*
             appBox.reset()
                 .title(param.values.NCCENR)
-                .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
+                .content(param.values)
+               // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
                 .position(param.event)
-                .show();
-        })
+                .show();*/
+
     }
     //Zoom-out: retour carte de France
     else {
@@ -107,12 +132,22 @@ const zoomToDept= (insee) => {
  * @param range
  * @returns {*}
  */
-const colorFactory = (baseColor, range=[0,100] )=> {
+const colorFactory = (baseColor, domain=[0,100] )=> {
     return d3.scaleLinear()
         .range([baseColor,'#eee'])
-        .domain([15,40])
-        .interpolate(d3.interpolateLab)
+        .domain(domain)
+        .interpolate(d3.interpolateLab);
 }
+
+
+const colorFactory2 = (baseColor, data )=> {
+   // console.log(data,Math.min(...data),Math.max(...data));
+    return d3.scaleLinear()
+        .range([baseColor,'#eee'])
+        .domain([d3.min(data),d3.max(data)])
+        .interpolate(d3.interpolateLab);
+}
+
 
 /**
  * Modifie le titre
@@ -145,14 +180,22 @@ const changeTitle = (candidat) => {
 /************************************** COMPOSANTS *******************************************/
 
 
-const   appTitle =          new Title('Titre',['titre','candidat']).appendTo('mainHeader'),
-        appNavigator =      new HtmlNavigationBreadcrumb('Navigator'),
-       // appDeptSelector =   new HtmlMenuSelect('choixDepartement', { label: 'Département: ', placeHolder:'Sélectionnez dans la liste' }).appendTo('mainHeader'),
-        appPanel =          new HtmlPanel('candPanel'),
-        appSelector =   new HtmlMenuButtons('boutonsCandidats',{label:'', style:'square'}),
-        appBox =            new HtmlContentBox('ContentBox').appendTo('mainOuterContainer');
+const   appTitle =          new Title('Titre',['titre','candidat']);
+const   appNavigator =      new NavBreadcrumb('Navigator');
+const   appPanel =          new Panel('candPanel');
+const   appSelector =   new NavButtons('boutonsCandidats',{label:'', style:'square'});
 
 
+
+const appBox =  new ContentBox('ContentBox');
+appBox.push=function(param){
+    //console.log(this,param);
+    this.reset()
+        .title(param.values.NCCENR)
+        // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
+        .position(param.event)
+        .show();
+}.bind(appBox)
 
 /************************************** DONNEES *******************************************/
 
@@ -169,13 +212,12 @@ const global = new Proxy( { candidat:1, departement:0 } , {
                 target.candidat=value;
                 changeTitle(candidat);
                 appPanel.fold({delay:500});
+               // console.warn(candidat);
                 mapDepartements
-                    .fill ( colorFactory( candidat.couleur,[15,35]),
-                        d =>  d.properties.values[0][candidat.key]);
+                    .fill ( colorFactory2( candidat.couleur,dataDepartements.col(candidat.key)), d =>  d.properties.extra[candidat.key]);
+                  //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
                 for (const[key,myMap] of Object.entries(mapCommunes)) {
-                    //console.log(myMap);
-                    myMap.fill ( colorFactory( candidat.couleur,[15,35]),
-                        d =>  d.properties.values[0][candidat.key]);
+                    myMap.fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
                 }
                // mapCommunes.forEach( m=> console.log(m));
                 return true;
@@ -191,43 +233,21 @@ const global = new Proxy( { candidat:1, departement:0 } , {
 
 
 const dataCandidats = new DataCollection('candidats')
-    .load('./../assets/data/candidats-stats.csv',
-        {
-            primary: 'id',
-            mapper: row => {
-                for (const [key, value] of Object.entries(row)) {
-                    row[key] = (['id', 'min', 'max', 'moy'].includes(key)) ? parseFloat(row[key]) : row[key];
-                }
-                return row;
-            }
-        });
-
-const refDepartements = new DataCollection('departements')
-    .load('./../assets/data/departements.csv',
-        {
-            primary: 'id',
-            mapper: row => row
-        });
+    .load('./../assets/data/candidats-test.csv',{ primary: 'id',  delimiter: ';', mapper: dataMapperCand });
 
 const dataDepartements = new DataCollection('resParDept')
-    .load('./../assets/data/FD.csv',
-        {
-            primary: 'id',
-            mapper: dataMapperDep
-        });
+    .load('./../assets/data/departements-test.csv',{ primary: 'insee', delimiter: ';', mapper: dataMapperDep });
 
-const refPrefectures = new DataCollection('prefectures')
-    .load('./../assets/geodata/prefectures.csv',
-        {   primary:'COM',
-                    mapper: row => row });
+const dataPrefectures = new DataCollection('prefectures')
+    .load('./../assets/geodata/prefectures.csv',{   primary:'COM', mapper: row => row });
 
 
 /**************************************** CARTES ***************************************/
 
 const   mapCommunes = { },
-        mapContainer =      new SvgMapComposition('maCarte')
+        mapContainer =      new MapComposition('maCarte')
                                 .appendTo('mainMap'),
-        mapDepartements =   new SvgMapLayer('departements', { autofit:true, primary:'DEP' })
+        mapDepartements =   new MapLayer('departements', { autofit:true, primary:'DEP' })
                                 .appendTo(mapContainer)
                                 .load('./../assets/geomap/departements.topojson');
 
@@ -258,12 +278,13 @@ mapContainer.dispatch.on('zoom', zoom => {
 
 /********************************** MAIN *****************************************/
 
-Promise.all([refDepartements.ready, dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
+Promise.all([ dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
 
-
+    appTitle.appendTo('mainHeader');
+    appBox.appendTo('mainMap');
 
     appNavigator.level(0,'France');
-    appNavigator.level(1,refDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'id', labelKey:'departement'});
+    appNavigator.level(1,dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
     appNavigator.appendTo('mainHeader');
     appNavigator.render();
     appNavigator.dispatch.on('change',(d)=> {
@@ -297,7 +318,7 @@ Promise.all([refDepartements.ready, dataDepartements.ready, dataCandidats.ready]
 
     mapDepartements
         .render()
-        .join (dataDepartements,'id')
+        .join (dataDepartements,'insee')
         .dispatch.on('click',(v)=> zoomToDept(v.id));
 
 

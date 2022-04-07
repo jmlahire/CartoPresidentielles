@@ -1,4 +1,4 @@
-﻿id,departement,tncc,reg_id,reg_nom,pref_id,pref_nom
+﻿insee,nom,tncc,reg_insee,reg_nom,pref_id,pref_nom
 01,Ain,5,84,Auvergne-Rhône-Alpes,01053,Bourg-en-Bresse
 02,Aisne,5,32,Hauts-de-France,02408,Laon
 03,Allier,5,84,Auvergne-Rhône-Alpes,03190,Moulins

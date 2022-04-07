@@ -1,0 +1,45 @@
+._Breadcrumb{
+
+  height:2rem;
+
+  ul {
+    white-space:nowrap;
+    list-style:none;
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: .5rem 0;
+    padding:0;
+  }
+
+  li:first-child {
+    padding-left:0;
+  }
+
+  li+li::before {
+    content: '>';
+    font-weight:bold;
+    margin: 0 .5rem;
+  }
+
+  a, option[selected] {
+    color:#333;
+    font-weight:bold;
+  }
+
+  select{
+
+    padding:.1rem .2rem;
+    border-radius:.2rem;
+    border: 1px solid #333;
+
+    &.selected{
+      border: 1px solid #eee;
+    }
+
+  }
+
+
+
+}

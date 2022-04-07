@@ -3202,8 +3202,8 @@
 
   const d3$9 = Object.assign({}, d3Selection);
 
-  class HtmlComponent extends Queue {
-    static type = 'HtmlComponent';
+  class Component extends Queue {
+    static type = '_Component';
     /**
      * Constructeur
      * @param id {String} : identifiant du composant
@@ -3250,8 +3250,8 @@
     }
     /**
      * Insère le composant dans le dom
-     * @param parent {HtmlComponent|d3.selection|String}: parent dans lequel insérer le composant. Au choix: objet hérité de HtmlComponent | sélecteur | id du parent | selection d3
-     * @returns {HtmlComponent}
+     * @param parent {Component|d3.selection|String}: parent dans lequel insérer le composant. Au choix: objet hérité de Component | sélecteur | id du parent | selection d3
+     * @returns {Component}
      */
 
 
@@ -3260,7 +3260,7 @@
       if (!this.outerContainer) console.warn(`Aucun élément dans le DOM correspondant à ${this.id}: impossible de l'insérer`); //Determination du type de parent
       else {
         //Composant
-        if (parent instanceof HtmlComponent) {
+        if (parent instanceof Component) {
           this.parentComponent = parent;
           this.parentContainer = parent.container || parent.innerContainer;
         } //Selection d3
@@ -3325,7 +3325,7 @@
 
     hide() {
       this.state.display = false;
-      this.outerContainer.style('visibility', 'collapse');
+      this.outerContainer.style('display', 'none');
       return this;
     }
 
@@ -3363,8 +3363,8 @@
    * CLASSE ABSTRAITE SERVANT DE BASE A LA TITRAILLE
    */
 
-  class HtmlContentTitle extends HtmlComponent {
-    static type = 'HtmlTitle';
+  class ContentText extends Component {
+    static type = '_Text';
     static defaultOptions = {
       tag: 'h1',
       class: 'title',
@@ -3378,7 +3378,7 @@
 
     constructor(id, options) {
       super(id);
-      options = { ...HtmlContentTitle.defaultOptions,
+      options = { ...ContentText.defaultOptions,
         ...options
       };
       this.spans = new Map();
@@ -3390,7 +3390,7 @@
      * @param span {String} : identifiant du span
      * @param content {String} : texte
      * @param style {Array} : styles à applique au span (optionnel)
-     * @returns {HtmlContentTitle}
+     * @returns {ContentText}
      */
 
 
@@ -3405,7 +3405,7 @@
     }
     /**
      * Affiche le titre
-     * @returns {HtmlContentTitle}
+     * @returns {ContentText}
      */
 
 
@@ -3430,7 +3430,7 @@
     }
     /**
      * Vide le contenu du titre
-     * @returns {HtmlContentTitle}
+     * @returns {ContentText}
      */
 
 
@@ -3440,7 +3440,7 @@
     }
     /**
      * Supprime le composant titre dans le DOM
-     * @returns {HtmlContentTitle}
+     * @returns {ContentText}
      */
 
 
@@ -3451,7 +3451,7 @@
 
   }
 
-  class Title extends HtmlContentTitle {
+  class Title extends ContentText {
     constructor(id, spans = ['text']) {
       super(id, {
         tag: 'h1',
@@ -3462,7 +3462,7 @@
 
   }
 
-  class InterTitle extends HtmlContentTitle {
+  class InterTitle extends ContentText {
     constructor(id, spans = ['text']) {
       super(id, {
         tag: 'h3',
@@ -3686,20 +3686,20 @@
 
   }
 
-  class HtmlNavigationBreadcrumb extends HtmlComponent {
-    static type = '_breadcrumb';
+  class NavBreadcrumb extends Component {
+    static type = '_Breadcrumb';
     static defaultOptions = {
       delimiter: '>'
     };
 
     constructor(id, options = {}) {
       super(id);
-      this.options = { ...HtmlNavigationBreadcrumb.defaultOptions,
+      this.options = { ...NavBreadcrumb.defaultOptions,
         ...options
       };
       this.levels = new Array();
       this.dispatch = d3$7.dispatch('change');
-      this._outerContainer = d3$7.create('nav').attr('id', this.id).classed('_breadcrumb', true);
+      this._outerContainer = d3$7.create('nav').attr('id', this.id).classed(NavBreadcrumb.type, true);
       this._innerContainer = this._outerContainer.append('ul');
       this._index = 0;
       this._active = 0;
@@ -3739,7 +3739,7 @@
    * Renvoie une série de boutons correspondant aux données passées en paramètre
    */
 
-  class HtmlMenuButtons extends HtmlComponent {
+  class NavButtons extends Component {
     static type = '_Buttons';
     static defaultOptions = {
       label: '',
@@ -3755,11 +3755,11 @@
 
     constructor(id, options = {}) {
       super(id);
-      this.options = { ...HtmlMenuButtons.defaultOptions,
+      this.options = { ...NavButtons.defaultOptions,
         ...options
       };
       this.dispatch = d3$6.dispatch('select');
-      this.container = d3$6.create('nav').attr('id', this.id).classed(HtmlMenuButtons.type, true).classed(this.options.style, true);
+      this.container = d3$6.create('nav').attr('id', this.id).classed(NavButtons.type, true).classed(this.options.style, true);
     }
     /**
      *
@@ -3773,7 +3773,7 @@
      * @param {String} [options.check]  Icone "checked" avec extension (optionnel)
      * @param {String} [options.path]   Chemin relatif vers les images (optionnel)
      * @param {String} [options.ext]    Extension des images, jpg par défaut (optionnel)
-     * @returns {HtmlMenuButtons}
+     * @returns {NavButtons}
      */
 
 
@@ -3793,7 +3793,7 @@
     }
     /**
      * Affiche les boutons
-     * @returns {HtmlMenuButtons}
+     * @returns {NavButtons}
      */
 
 
@@ -3815,7 +3815,7 @@
     /**
      * Sélectionne un bouton
      * @param {Object|String|Number} datum      données associées à un bouton (appelé en général par methode interne) ou identifiant du boouton (appelé de l'extérieur)
-     * @returns {HtmlMenuButtons}
+     * @returns {NavButtons}
      */
 
 
@@ -7782,43 +7782,70 @@
   });
 
   const d3$5 = Object.assign({}, d3Selection, d3Scale, d3Drag);
+  /**
+   * Renvoie la position d'un node par rapport à l'origine de la page
+   * @param obj
+   * @returns {{x: number, y: number}}
+   */
 
-  class HtmlContentBox extends HtmlComponent {
-    static type = 'HtmlContentBox';
+  function findPos(obj) {
+    let left = 0,
+        top = 0;
 
-    constructor(id, options = {
+    if (obj.offsetParent) {
+      do {
+        left += obj.offsetLeft;
+        top += obj.offsetTop;
+      } while (obj = obj.offsetParent);
+
+      return {
+        x: left,
+        y: top
+      };
+    }
+  }
+
+  class ContentBox extends Component {
+    static type = '_ContentBox';
+    static defaultOptions = {
       closeButton: true,
-      draggable: true
-    }) {
+      draggable: true,
+      margins: {
+        top: 5,
+        right: 30,
+        bottom: 5,
+        left: 5
+      }
+    };
+
+    constructor(id, options = {}) {
       super(id);
-      this._outerContainer = d3$5.create('div').attr('id', this.id).classed(HtmlContentBox.type, true);
+      options = { ...ContentBox.defaultOptions,
+        ...options
+      };
+      this.options = options;
+      this._outerContainer = d3$5.create('div').attr('id', this.id).classed(ContentBox.type, true);
       this._title = this._outerContainer.append('h2').classed('subtitle', true);
       this._innerContainer = this._outerContainer.append('div').classed('inner', true);
 
       if (options.closeButton) {
-        this._outerContainer.append('p').classed('close', true).text('X').on('click', () => this.hide());
+        this._outerContainer.append('img').classed('close', true).attr('src', 'assets/img/close.svg').on('click', () => this.hide());
       }
 
-      this._text = this._innerContainer.append('section').classed('content', true);
+      this._text = this._innerContainer.append('section').classed('content', true); //Ajustement du positionnement
 
-      const offsetHandler = {
-        get: function (target, prop) {
+      this.offset = new Proxy({}, {
+        get: (target, prop) => {
           return target[prop];
-        }.bind(this),
-        set: function (target, prop, value) {
-          const coordToCss = {
-            'x': 'left',
-            'y': 'top'
-          };
-          let limits = [];
-          if (prop === 'x') limits = [this.containerBounds.left, this.containerBounds.right - this.bounds.width];else if (prop === 'y') limits = [this.containerBounds.top, this.containerBounds.bottom - this.bounds.height];
-          value = value < limits[0] ? limits[0] : value > limits[1] ? limits[1] : value;
+        },
+        set: (target, prop, value) => {
+          // const coordToCss = {'x': 'left', 'y': 'top'};
+          value = this.containMove(value, prop);
+          this.outerContainer.style(prop == 'x' ? 'left' : 'top', d => value + 'px');
           target[prop] = value;
-          this.outerContainer.style(coordToCss[prop], d => value + 'px');
           return true;
-        }.bind(this)
-      };
-      this.offset = new Proxy({}, offsetHandler);
+        }
+      }); //Drag
 
       if (options.draggable) {
         const delta = {
@@ -7827,6 +7854,8 @@
         };
 
         const onStart = event => {
+          this._title.classed('dragged', true);
+
           delta.x = event.x;
           delta.y = event.y;
         };
@@ -7836,7 +7865,9 @@
           this.offset.y += event.y - delta.y;
         };
 
-        const onEnd = () => {};
+        const onEnd = () => {
+          this._title.classed('dragged', false);
+        };
 
         this._title.classed('draggable', true).call(d3$5.drag().on("start", onStart).on("drag", onDrag).on("end", onEnd));
       }
@@ -7854,10 +7885,6 @@
       return this._innerContainer;
     }
 
-    get size() {
-      return this._outerContainer.node().getBoundingClientRect();
-    }
-
     get containerBounds() {
       let bounds = this.parentContainer.node().getBoundingClientRect();
       bounds.x += window.pageXOffset;
@@ -7867,6 +7894,21 @@
 
     get bounds() {
       return this.outerContainer.node().getBoundingClientRect();
+    }
+    /**
+     * Vérifie une coordonnée x ou y par rapport à la zone d'affichage théorique, et renvoie une coordonnée corrigée au besoin
+     * @param {Number} coord        Coordonnée x ou y par rapport au contenur
+     * @param {String} axis         'x' ou 'y'
+     * @returns {String|*}
+     */
+
+
+    containMove(coord, axis = 'x') {
+      if (!this._limits) this._limits = {
+        x: [this.options.margins.left, this.containerBounds.width - this.bounds.width - this.options.margins.left - this.options.margins.right],
+        y: [this.options.margins.top, this.containerBounds.height - this.bounds.height - this.options.margins.top - this.options.margins.bottom]
+      };
+      if (coord < this._limits[axis][0]) return this._limits[axis][0];else if (coord > this._limits[axis][1]) return this._limits[axis][1];else return coord;
     }
 
     reset() {
@@ -7885,8 +7927,9 @@
 
     position(event) {
       this.enqueue(() => new Promise((resolve, reject) => {
-        let x = event.clientX + window.pageXOffset,
-            y = event.clientY + window.pageYOffset;
+        let parentPos = findPos(this.parentContainer.node()),
+            x = event.pageX - parentPos.x,
+            y = event.pageY - parentPos.y;
         this.offset.x = x;
         this.offset.y = y;
         resolve(this);
@@ -8074,13 +8117,14 @@
 
   const d3$4 = Object.assign({}, d3Selection, d3Timer, d3Dispatch);
 
-  class HtmlPanel extends HtmlComponent {
+  class Panel extends Component {
     static type = '_Panel';
     static defaultOptions = {
       anchor: 'right',
       width: '70%',
       height: '98%',
-      handleWidth: '8%',
+      maxWidth: 500,
+      handleWidth: 24,
       initialPosition: 'folded',
       duration: 1000,
       delay: 0,
@@ -8095,7 +8139,8 @@
      * @param {String} options.anchor               Ancrage (right par défaut)
      * @param {String} options.width                Largeur du panneau en % de l'élement parent
      * @param {String} options.height               Hauteur du panneau en % de l'élement parent
-     * @param {String} options.handleWidth          Largeur de la poignée en % du panneau
+     * @param {String} options.handleWidth          Largeur de la poignée en pixels
+     * @param {String} options.maxWidth             Largeur maximale du apnneau en pixels
      * @param {String} options.initialPosition      Position initiale (folded ou unfolded)
      * @param {Number} options.duration             Durée des transitions
      * @param {Number} options.delay                Délai des transitions
@@ -8105,14 +8150,14 @@
 
     constructor(id, options) {
       super(id);
-      this.options = { ...HtmlPanel.defaultOptions,
+      this.options = { ...Panel.defaultOptions,
         ...options
       };
       this.state.position = this.options.initialPosition;
       this.dispatch = d3$4.dispatch('position');
       this.timer = new d3$4.timeout(() => {}, 0); //Creation des divs
 
-      this._outerContainer = d3$4.create('div').classed(HtmlPanel.type, true).classed('right', true);
+      this._outerContainer = d3$4.create('div').classed(Panel.type, true).classed('right', true);
       this._handle = this._outerContainer.append('div').classed('handle', true);
       this._innerContainer = this._outerContainer.append('div').classed('content', true);
 
@@ -8137,7 +8182,7 @@
     }
     /**
      * Calcule les dimensions du panneau par rapport à l'élement parent, et le redimensionne
-     * @returns {HtmlPanel}
+     * @returns {Panel}
      */
 
 
@@ -8150,13 +8195,13 @@
 
       const parentSize = this.parentContainer.node().getBoundingClientRect();
       this.size = {
-        width: applyPercent(parentSize.width, this.options.width),
+        width: Math.min(applyPercent(parentSize.width, this.options.width), parseInt(this.options.maxWidth)),
         height: applyPercent(parentSize.height, this.options.height)
       }; //Dimensionnement du panel
 
       this.outerContainer.style('top', `${(parentSize.height - this.size.height) / 2}px`).style('width', `${this.size.width}px`).style('height', `${this.size.height}px`); //Dimensionnement et positionnement poignée
 
-      this.size.handle = applyPercent(this.size.width, this.options.handleWidth);
+      this.size.handle = parseInt(this.options.handleWidth);
 
       this._handle.style('width', `${this.size.handle}px`).style('height', `${this.size.height}px`);
 
@@ -8178,7 +8223,7 @@
      * @param {Object} options              Options:
      * @param {Number} options.duration         Durée des transitions
      * @param {Number} options.delay            Délai des transitions
-     * @returns {HtmlPanel}
+     * @returns {Panel}
      */
 
 
@@ -8204,7 +8249,7 @@
      * @param {Object} options              Options:
      * @param {Number} options.duration         Durée des transitions
      * @param {Number} options.delay            Délai des transitions
-     * @returns {HtmlPanel}
+     * @returns {Panel}
      */
 
 
@@ -13075,7 +13120,7 @@
 
   Object.assign({}, d3Selection);
 
-  class SvgComponent extends HtmlComponent {
+  class SvgComponent extends Component {
     static type = 'SvgComponent';
   }
 
@@ -13162,8 +13207,8 @@
 
   const d3$2 = Object.assign({}, d3Selection, d3Geo, d3Zoom, d3Transition, d3Ease, d3Dispatch);
 
-  class SvgMapComposition extends Svg {
-    static type = 'SvgMapComposition';
+  class MapComposition extends Svg {
+    static type = 'MapComposition';
     static defaultOptions = {
       duration: 2000,
       delay: 0,
@@ -13185,7 +13230,7 @@
 
     constructor(id, size = {}, options = {}) {
       super(id, size);
-      this.options = { ...SvgMapComposition.defaultOptions,
+      this.options = { ...MapComposition.defaultOptions,
         ...options
       };
       this.defs = this.outerContainer.append('defs').lower();
@@ -13441,7 +13486,7 @@
     return geometry(o);
   }
 
-  class SvgMapRegister {
+  class MapRegister {
     constructor() {
       this.register = new Map();
     }
@@ -13475,15 +13520,15 @@
 
   }
 
-  const svgMapRegister = new SvgMapRegister();
+  const svgMapRegister = new MapRegister();
 
   const d3$1 = Object.assign({}, d3Selection, d3Geo, d3Dispatch, d3Fetch, d3Transition);
 
-  class SvgMapLayer extends SvgComponent {
+  class MapLayer extends SvgComponent {
     static type = '_Layer';
     static defaultOptions = {
       autofit: false,
-      valuesKey: 'values',
+      valuesKey: 'extra',
       blank: '#fff',
       clickable: true
     };
@@ -13491,13 +13536,13 @@
     constructor(id, options = {}) {
       super(id);
       if (svgMapRegister.has(id)) return svgMapRegister.get(id);else {
-        this.options = { ...SvgMapLayer.defaultOptions,
+        this.options = { ...MapLayer.defaultOptions,
           ...options
         };
         Object.assign(this.state, {
           rendered: false
         });
-        this.container = d3$1.create('svg:g').attr('id', this.id).classed(SvgMapLayer.type, true).classed(options.className, options.className);
+        this.container = d3$1.create('svg:g').attr('id', this.id).classed(MapLayer.type, true).classed(options.className, options.className);
         svgMapRegister.add(id, this);
         this.dispatch = d3$1.dispatch("click");
       }
@@ -13562,7 +13607,7 @@
     }
     /**
      * Limite le zoom et le déplacement au contenu du calque
-     * @returns {SvgMapLayer}
+     * @returns {MapLayer}
      */
 
 
@@ -13603,18 +13648,23 @@
             d3$1.select(n[i]);
                   const id = d.properties[geoKey],
                   datum = data.get(id);
-            d.properties[this.options.valuesKey] = datum;
+            d.properties[this.options.valuesKey] = Array.isArray(datum) ? datum[0] : undefined;
           });
           resolve(this);
         });
       }));
       return this;
     }
+
+    exportProperties() {
+      this.container.selectAll('path.area').each(d => console.log(d));
+      return this;
+    }
     /**
      * Dessine une carte chloroplethe
      * @param colorFn {Function} : fonction convertissant la valeur en couleur
      * @param accessorFn {Function} : accesseur permettant d'accéder à la propriété qui contient les valeurs (à partir de d.properties) Ex: d=>d.properties.myvalue
-     * @returns {SvgMapLayer}
+     * @returns {MapLayer}
      */
 
 
@@ -13627,7 +13677,7 @@
 
           try {
             data = accessorFn(d);
-            color = colorFn(data);
+            color = colorFn(data); //  console.log(data,color,colorFn.domain());
           } catch (error) {
             data = null;
             color = this.options.blank || '#fff';
@@ -13697,7 +13747,7 @@
     }
     /**
      * Retire la classe selected à tous les paths
-     * @returns {SvgMapLayer}
+     * @returns {MapLayer}
      */
 
 
@@ -13719,7 +13769,7 @@
 
   const dataMapperCom = row => {
     for (const [key, value] of Object.entries(row)) {
-      row[key] = ['dep', 'insee', 'com'].includes(key) ? row[key] : parseFloat(row[key]);
+      row[key] = ['dep', 'insee', 'nom'].includes(key) ? row[key] : parseFloat(row[key]);
     }
 
     return row;
@@ -13733,11 +13783,30 @@
 
   const dataMapperDep = row => {
     for (const [key, value] of Object.entries(row)) {
-      row[key] = key === 'id' ? row[key] : parseFloat(row[key]);
+      if (key.substring(0, 2) === 'nb' || key === 'tncc' || key === 'reg_insee') row[key] = parseInt(row[key]);else if (key.substring(0, 4) === 'voix' || key === 'participation') row[key] = parseFloat(row[key]);
     }
 
     return row;
   };
+  /**
+   * Mapper pour le fichier candidats
+   * @param row
+   * @returns {*}
+   */
+
+
+  const dataMapperCand = row => {
+    for (const [key, value] of Object.entries(row)) {
+      row[key] = ['id', 'dep_min', 'dep_max', 'dep_moy', 'dep_med', 'com_min', 'com_max', 'com_moy', 'com_med', 'fr_moy'].includes(key) ? parseFloat(row[key]) : row[key];
+    }
+
+    return row;
+  };
+  /**
+   * Zoome sur un departement
+   * @param insee
+   */
+
 
   const zoomToDept = insee => {
     appBox.hide();
@@ -13745,27 +13814,40 @@
 
     if (insee) {
       mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
-      const candidat = dataCandidats.find(global.candidat); //Cas A : Carte et données à charger
+      const candidat = dataCandidats.find(global.candidat); //  console.log(appNavigator.level(1));
+      //Cas A : Carte et données à charger
 
       if (!mapCommunes[`_${insee}`]) {
         const dataCommunes = new DataCollection(`Résultats_${insee}`).load(`./assets/data/${insee}.csv`, {
           primary: 'insee',
           mapper: dataMapperCom
         });
-        mapCommunes[`_${insee}`] = new SvgMapLayer(`_${insee}`, {
-          primary: 'COM',
-          secondary: 'NCC',
-          className: 'communes'
-        }).appendTo(mapContainer).load(`./assets/geomap/${insee}.topojson`).render().join(dataCommunes, 'insee').fill(colorFactory(candidat.couleur, [15, 35]), d => d.properties.values[0][candidat.key]).labels(refPrefectures, 'COM', 'NCCENR'); // mapContainer.zoomable(true);
+        dataCommunes.ready.then(v => {
+          mapCommunes[`_${insee}`] = new MapLayer(`_${insee}`, {
+            primary: 'COM',
+            secondary: 'NCC',
+            className: 'communes'
+          }).appendTo(mapContainer).load(`./assets/geomap/${insee}.topojson`);
+          mapCommunes[`_${insee}`].exportProperties();
+          mapCommunes[`_${insee}`].render().join(dataCommunes, 'insee').fill(colorFactory2(candidat.couleur, dataCommunes.col(candidat.key)), d => d.properties.extra[candidat.key]) // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
+          .labels(dataPrefectures, 'COM', 'NCCENR');
+          mapCommunes[`_${insee}`].dispatch.on('click', appBox.push);
+        }); //AJOUTER PROMESSE dataCommunes.ready
+        // mapContainer.zoomable(true);
       } //Cas B : carte et données déjà chargés
       else {
-        mapCommunes[`_${insee}`].fadeIn(); //mapDepartements.zoomOn(insee);
+        mapCommunes[`_${insee}`].fadeIn(); //  mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
+        //mapDepartements.zoomOn(insee);
       }
 
       mapDepartements.zoomOn(insee);
-      mapCommunes[`_${insee}`].dispatch.on('click', param => {
-        appBox.reset().title(param.values.NCCENR).table(param.values.values, d => `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`).position(param.event).show();
-      });
+      /*
+      appBox.reset()
+          .title(param.values.NCCENR)
+          .content(param.values)
+         // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
+          .position(param.event)
+          .show();*/
     } //Zoom-out: retour carte de France
     else {
       mapDepartements.deselectAll();
@@ -13781,8 +13863,13 @@
    */
 
 
-  const colorFactory = (baseColor, range = [0, 100]) => {
-    return d3.scaleLinear().range([baseColor, '#eee']).domain([15, 40]).interpolate(d3.interpolateLab);
+  const colorFactory = (baseColor, domain = [0, 100]) => {
+    return d3.scaleLinear().range([baseColor, '#eee']).domain(domain).interpolate(d3.interpolateLab);
+  };
+
+  const colorFactory2 = (baseColor, data) => {
+    // console.log(data,Math.min(...data),Math.max(...data));
+    return d3.scaleLinear().range([baseColor, '#eee']).domain([d3.min(data), d3.max(data)]).interpolate(d3.interpolateLab);
   };
   /**
    * Modifie le titre
@@ -13814,16 +13901,22 @@
   /************************************** COMPOSANTS *******************************************/
 
 
-  const appTitle = new Title('Titre', ['titre', 'candidat']).appendTo('mainHeader'),
-        appNavigator = new HtmlNavigationBreadcrumb('Navigator'),
-        // appDeptSelector =   new HtmlMenuSelect('choixDepartement', { label: 'Département: ', placeHolder:'Sélectionnez dans la liste' }).appendTo('mainHeader'),
-  appPanel = new HtmlPanel('candPanel'),
-        appSelector = new HtmlMenuButtons('boutonsCandidats', {
+  const appTitle = new Title('Titre', ['titre', 'candidat']);
+  const appNavigator = new NavBreadcrumb('Navigator');
+  const appPanel = new Panel('candPanel');
+  const appSelector = new NavButtons('boutonsCandidats', {
     label: '',
     style: 'square'
-  }),
-        appBox = new HtmlContentBox('ContentBox').appendTo('mainOuterContainer');
+  });
+  const appBox = new ContentBox('ContentBox');
+
+  appBox.push = function (param) {
+    //console.log(this,param);
+    this.reset().title(param.values.NCCENR) // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
+    .position(param.event).show();
+  }.bind(appBox);
   /************************************** DONNEES *******************************************/
+
 
   const global = new Proxy({
     candidat: 1,
@@ -13842,12 +13935,12 @@
           changeTitle(candidat);
           appPanel.fold({
             delay: 500
-          });
-          mapDepartements.fill(colorFactory(candidat.couleur, [15, 35]), d => d.properties.values[0][candidat.key]);
+          }); // console.warn(candidat);
+
+          mapDepartements.fill(colorFactory2(candidat.couleur, dataDepartements.col(candidat.key)), d => d.properties.extra[candidat.key]); //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
 
           for (const [key, myMap] of Object.entries(mapCommunes)) {
-            //console.log(myMap);
-            myMap.fill(colorFactory(candidat.couleur, [15, 35]), d => d.properties.values[0][candidat.key]);
+            myMap.fill(colorFactory(candidat.couleur, [candidat.dep_min, candidat.dep_max]), d => d.properties.extra[candidat.key]);
           } // mapCommunes.forEach( m=> console.log(m));
 
 
@@ -13861,33 +13954,25 @@
       return true;
     }
   });
-  const dataCandidats = new DataCollection('candidats').load('././assets/data/candidats-stats.csv', {
+  const dataCandidats = new DataCollection('candidats').load('././assets/data/candidats-test.csv', {
     primary: 'id',
-    mapper: row => {
-      for (const [key, value] of Object.entries(row)) {
-        row[key] = ['id', 'min', 'max', 'moy'].includes(key) ? parseFloat(row[key]) : row[key];
-      }
-
-      return row;
-    }
+    delimiter: ';',
+    mapper: dataMapperCand
   });
-  const refDepartements = new DataCollection('departements').load('././assets/data/departements.csv', {
-    primary: 'id',
-    mapper: row => row
-  });
-  const dataDepartements = new DataCollection('resParDept').load('././assets/data/FD.csv', {
-    primary: 'id',
+  const dataDepartements = new DataCollection('resParDept').load('././assets/data/departements-test.csv', {
+    primary: 'insee',
+    delimiter: ';',
     mapper: dataMapperDep
   });
-  const refPrefectures = new DataCollection('prefectures').load('././assets/geodata/prefectures.csv', {
+  const dataPrefectures = new DataCollection('prefectures').load('././assets/geodata/prefectures.csv', {
     primary: 'COM',
     mapper: row => row
   });
   /**************************************** CARTES ***************************************/
 
   const mapCommunes = {},
-        mapContainer = new SvgMapComposition('maCarte').appendTo('mainMap'),
-        mapDepartements = new SvgMapLayer('departements', {
+        mapContainer = new MapComposition('maCarte').appendTo('mainMap'),
+        mapDepartements = new MapLayer('departements', {
     autofit: true,
     primary: 'DEP'
   }).appendTo(mapContainer).load('././assets/geomap/departements.topojson'); //Modifie l'opacité de la couche départements en fonction du niveau de zoom
@@ -13905,13 +13990,15 @@
   });
   /********************************** MAIN *****************************************/
 
-  Promise.all([refDepartements.ready, dataDepartements.ready, dataCandidats.ready]).then(() => {
+  Promise.all([dataDepartements.ready, dataCandidats.ready]).then(() => {
+    appTitle.appendTo('mainHeader');
+    appBox.appendTo('mainMap');
     appNavigator.level(0, 'France');
-    appNavigator.level(1, refDepartements, {
+    appNavigator.level(1, dataDepartements, {
       placeHolder: 'Département',
       nestKey: 'reg_nom',
-      valueKey: 'id',
-      labelKey: 'departement'
+      valueKey: 'insee',
+      labelKey: 'nom'
     });
     appNavigator.appendTo('mainHeader');
     appNavigator.render();
@@ -13936,7 +14023,7 @@
           .text('Retour à la carte de France')
           .on('click', ()=> global.departement=0);*/
 
-    mapDepartements.render().join(dataDepartements, 'id').dispatch.on('click', v => zoomToDept(v.id)); //new Title('titrePano',['text']).text('text','Candidats').render().appendTo(appCandSelector);
+    mapDepartements.render().join(dataDepartements, 'insee').dispatch.on('click', v => zoomToDept(v.id)); //new Title('titrePano',['text']).text('text','Candidats').render().appendTo(appCandSelector);
 
     /* appDeptSelector
          .data( refDepartements.toGroups('reg_nom'), { nested:true, nameKey:'departement', valueKey: 'id' } )

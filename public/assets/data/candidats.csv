@@ -1,13 +1,15 @@
-id,nom,prenom,parti,sigle,img,couleur,min,max,moy
-1,ARTHAUD,Nathalie,Lutte ouvrière,LO,arthaud,#BC1A1A,17,34,25
-2,ROUSSEL,Fabien,Parti communiste,PCF,roussel,#FF0000,17,34,25
-3,MACRON,Emmanuel,La République en Marche,LREM,macron,#FF8000,17,34,25
-4,LASSALLE,Jean,Résistons,,lassalle,#9A7D24,17,34,25
-5,LE PEN,Marine,Rassemblement national,RN,lepen,#1C4385,17,34,25
-6,ZEMMOUR,Éric,Reconquête,,zemmour,#071868,17,34,25
-7,MÉLENCHON,Jean-Luc,France insoumise,LFI,melenchon,#FB6969,17,34,25
-8,HIDALGO,Anne,Parti socialiste,PS,hidalgo,#F76E9E,17,34,25
-9,JADOT,Yannick,Europe-Ecologie Les Verts, Génération.s,EELV,jadot,#6EF000,17,34,25
-10,PÉCRESSE,Valérie,Les Républicains,LR,pecresse,#2B99FC,17,34,25
-11,POUTOU,Philippe,Nouveau parti anticapitaliste,NPA,poutou,#E54343,17,34,25
-12,DUPONT-AIGNAN,Nicolas,Debout la France,DLF,dupontaignan,#042FA0,17,34,25
+id,nom,prenom,parti,sigle,img,couleur,key,dep_min,dep_moy,dep_max
+1,Arthaud,Nathalie,Lutte ouvrière,LO,arthaud,#BC1A1A,voix_1,1,2.5.3
+2,Roussel,Fabien,Parti communiste,PCF,roussel,#FF0000,voix_2,2,3.5,5
+3,Macron,Emmanuel,La République en Marche,LREM,macron,#FF8000,voix_3,15,18,30
+4,Lassalle,Jean,Résistons,,lassalle,#9A7D24,voix_4,15,18,30
+5,Le Pen,Marine,Rassemblement national,RN,lepen,#1C4385,voix_5,0,5,10
+6,Zemmour,Éric,Reconquête,,zemmour,#071868,voix_6,10,15,25
+7,Mélenchon,Jean-Luc,France insoumise,LFI,melenchon,#FB6969,voix_7,0,5,10
+8,Hidalgo,Anne,Parti socialiste,PS,hidalgo,#F76E9E,voix_8,0,5,10
+9,Jadot,Yannick,Europe-Ecologie Les Verts & Génération.s,EELV,jadot,#6EF000,voix_9,0,5,10
+10,Pécresse,Valérie,Les Républicains,LR,pecresse,#2B99FC,voix_10,0,5,10
+11,Poutou,Philippe,Nouveau parti anticapitaliste,NPA,poutou,#E54343,voix_11,0,5,10
+12,Dupont-Aignan,Nicolas,Debout la France,DLF,dupontaignan,#042FA0,voix_12,0,5,10
+13,Abstention,,,,abstention,#042FA0,voix_13,80,95,100
+14,Vote blanc,,,,voteblanc,#042FA0,voix_14,0,5,10
