@@ -1,0 +1,2 @@
+insee;dep;nom;nb_inscrits;nb_votants;nb_exprimes;nb_voix1;nb_voix2;nb_voix3;nb_voix4;nb_voix5;nb_voix6;nb_voix7;nb_voix8;nb_voix9;nb_voix10;nb_voix11;nb_voix12;nb_voix13;nb_voix14;voix_1;voix_2;voix_3;voix_4;voix_5;voix_6;voix_7;voix_8;voix_9;voix_10;voix_11;voix_12;voix_13;voix_14
+ZW001;ZW;Wallis-Et-Futuna;8464;5411;5348;380;192;1630;1526;79;29;1349;50;41;54;18;0;3053;28;7.11;3.59;30.48;28.53;1.48;0.54;25.22;0.93;0.77;1.01;0.34;0;36.07;0.52

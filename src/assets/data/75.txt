@@ -1,0 +1,2 @@
+insee;dep;nom;nb_inscrits;nb_votants;nb_exprimes;nb_voix1;nb_voix2;nb_voix3;nb_voix4;nb_voix5;nb_voix6;nb_voix7;nb_voix8;nb_voix9;nb_voix10;nb_voix11;nb_voix12;nb_voix13;nb_voix14;voix_1;voix_2;voix_3;voix_4;voix_5;voix_6;voix_7;voix_8;voix_9;voix_10;voix_11;voix_12;voix_13;voix_14
+75056;75;Paris;1301637;1091437;1076559;53719;210548;375006;284744;17997;5490;109550;8337;6799;2897;1472;0;210200;4251;4.99;19.56;34.83;26.45;1.67;0.51;10.18;0.77;0.63;0.27;0.14;0;16.15;0.39
