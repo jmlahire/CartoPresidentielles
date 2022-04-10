@@ -69,9 +69,10 @@ class MapComposition extends Svg{
 
     /**
      * Zoome sur une sélection d'élements svg
-     * @param {d3-selection} selection : selection d3
+     * @param {d3-selection} selection  : selection d3
+     * @param {Number} zoomMargin          fixe la proportion des marges autour de la sélection zoomée (1: cadré serré, 0.5: cadré sur la moitié de la zone, etx...)
      */
-    zoomTo(selection){
+    zoomTo(selection, zoomMargin=1){
         this.enqueue( () => new Promise((resolve, reject) => {
             selection = [selection.node()];
             this._freezoom = false;
@@ -91,7 +92,7 @@ class MapComposition extends Svg{
             const bounds = getBoundaries(selection),
                 hscale = this.size.effectiveWidth / (bounds.x2 - bounds.x1),
                 vscale = this.size.effectiveHeight / (bounds.y2 - bounds.y1),
-                scale = Math.min(hscale, vscale),
+                scale = Math.min(hscale, vscale)*zoomMargin,
                 offset = {
                     x: -bounds.x1 * scale + (this.size.effectiveWidth - (bounds.x2 - bounds.x1) * scale) / 2,
                     y: -bounds.y1 * scale + (this.size.effectiveHeight - (bounds.y2 - bounds.y1) * scale) / 2

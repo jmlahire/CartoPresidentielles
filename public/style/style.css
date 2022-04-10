@@ -1,10 +1,4 @@
-body {
-  background: #333;
-}
-
-g._Layer path.area {
-  stroke: #fff;
-}#Titre {
+#Titre {
   margin-bottom: 1rem;
 }
 
@@ -36,6 +30,7 @@ g._Layer path.area {
 }
 
 #boutonsCandidats figure {
+  flex: 0 0 30%;
   max-width: 100px;
   order: 2;
 }
@@ -46,7 +41,18 @@ g._Layer path.area {
   padding: 10px 0;
 }
 #boutonsCandidats figure._13 img, #boutonsCandidats figure._14 img {
+  width: 40%;
   max-width: 100px;
+}
+@media screen and (max-width: 768px) {
+  #boutonsCandidats figure {
+    flex: 0 0 25%;
+  }
+}
+@media screen and (max-width: 500px) {
+  #boutonsCandidats figcaption {
+    display: none;
+  }
 }
 
 ._ContentBox section > p {
@@ -56,11 +62,11 @@ g._Layer path.area {
 h1, h2, h3, h4, h5, h6 {
   font-family: "Roboto", sans-serif;
   margin-top: 0;
-  color: #333;
+  color: "#333";
 }
 
 p, input, textarea, select, a, li, option {
-  color: #888;
+  color: "#888";
 }
 
 div {
@@ -72,125 +78,18 @@ svg {
   width: 100%;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 0;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  border-radius: 2px;
-  transition: background 0.5s ease-out;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #efefef;
-}
-
 img {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 button:focus {
   outline: 0 !important;
-}._Buttons {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-._Buttons.round img.photo {
-  border-radius: 50%;
-}
-._Buttons.round img.check {
-  position: absolute;
-  top: 6%;
-  right: 10%;
-  width: 20%;
-  opacity: 0;
-}
-._Buttons.round .selected img {
-  opacity: 1;
-}
-._Buttons.square img.photo {
-  border-radius: 10%;
-  filter: grayscale(1);
-}
-._Buttons.square img.check {
-  display: none;
-}
-._Buttons.square .selected img.photo {
-  filter: grayscale(0);
-  opacity: 1;
-}
-._Buttons figure {
-  flex: 0 0 30%;
-  position: relative;
-  margin: 0 0 1rem 0 !important;
-}
-._Buttons figure img {
-  transition: all 500ms ease-in-out;
-}
-._Buttons figure figcaption {
-  line-height: 1;
-  font-style: normal !important;
-}
-._Buttons figure > img.photo {
-  opacity: 0.6;
-  width: 70%;
-  border: 3px solid white;
-  cursor: pointer;
-}
-._Buttons figure > img.photo:hover {
-  opacity: 1;
-}
-._Buttons figure.selected figcaption {
-  font-weight: bold;
-}._Panel {
-  position: absolute;
-  z-index: 100;
-}
-._Panel > div {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-._Panel div.handle {
-  border: 1px solid #333;
-  border-right: none;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-}
-._Panel div.handle span {
-  display: inline-block;
-  transition: all 500ms ease-in-out;
-  margin-left: 20%;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-._Panel div.handle:hover span {
-  color: #000;
-}
-._Panel div.content {
-  border-top: 1px solid #333;
-  border-bottom: 1px solid #333;
-  background: #fcfcfc;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+}body {
+  background: #333;
 }
 
-._Panel.right {
-  right: 0;
-}
-._Panel.right div.handle {
-  border-radius: 10px 0 0 10px;
-}
-._Panel.right.folded div.handle span {
-  transform: rotate(0deg);
-}
-._Panel.right.unfolded div.handle span {
-  transform: rotate(180deg);
+g._Layer path.area {
+  stroke: #fff;
 }.title, .subtitle, .intertitle {
   display: block;
   width: 100%;
@@ -202,105 +101,6 @@ button:focus {
 
 .title.center, .subtitle.center {
   text-align: right;
-}._Breadcrumb ul {
-  white-space: nowrap;
-  list-style: none;
-  align-items: flex-start;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  margin: 0.5rem 0;
-  padding: 0;
-}
-._Breadcrumb li:first-child {
-  padding-left: 0;
-}
-._Breadcrumb li + li::before {
-  content: ">";
-  font-weight: bold;
-  margin: 0 0.5rem;
-}
-._Breadcrumb a, ._Breadcrumb option[selected] {
-  color: #333;
-}
-._Breadcrumb option:disabled {
-  color: #ccc;
-  font-style: italic;
-}
-._Breadcrumb select, ._Breadcrumb input {
-  padding: 0.1rem 0.2rem;
-  border-radius: 4px;
-  border: 1px solid #eee;
-}
-._Breadcrumb select:focus, ._Breadcrumb input:focus {
-  padding: 0.1rem 0.2rem;
-  border-radius: 4px;
-  border: 1px solid #333;
-}
-._Breadcrumb span.autocomplete {
-  width: 25rem;
-  position: relative;
-}
-._Breadcrumb span.autocomplete input {
-  width: 100%;
-  display: inline-block;
-}
-._Breadcrumb span.autocomplete select {
-  position: absolute;
-  display: none;
-  margin-top: 5px;
-  left: 0;
-  width: 100%;
-  overflow: visible;
-  z-index: 50;
-}
-._Breadcrumb span.autocomplete select.visible {
-  display: block;
-}@keyframes blink {
-  0% {
-    stroke-width: 1;
-  }
-  50% {
-    stroke-width: 4;
-  }
-  100% {
-    stroke-width: 1;
-  }
-}
-._Layer path.area {
-  fill: #fff;
-  stroke: #ccc;
-  stroke-width: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
-  pointer-events: none;
-}
-._Layer path.area.clickable {
-  transition: all 200ms ease-in-out;
-  pointer-events: visiblePainted;
-  cursor: pointer;
-}
-._Layer path.area.clickable:hover {
-  stroke-width: 1;
-}
-._Layer path.area.selected {
-  animation: blink 1s linear infinite;
-}
-._Layer g.labels text.label {
-  transition: opacity 500ms ease-in-out;
-  fill: #fff;
-  text-anchor: middle;
-  stroke: #333;
-  stroke-width: 4;
-  user-select: none;
-  pointer-events: none;
-  paint-order: stroke;
-  vector-effect: non-scaling-stroke;
-  opacity: 1;
-}
-._Layer g.labels text.label.invisible {
-  opacity: 0;
 }._ContentBox {
   position: absolute;
   top: 500px;
@@ -363,6 +163,259 @@ button:focus {
 }
 ._ContentBox .inner::-webkit-scrollbar-track {
   background: #eee;
+}._Panel {
+  position: absolute;
+  z-index: 100;
+}
+._Panel > div {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+._Panel div.handle {
+  border: 1px solid #333;
+  border-right: none;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+._Panel div.handle span {
+  display: inline-block;
+  transition: all 500ms ease-in-out;
+  margin-left: 20%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+._Panel div.handle:hover span {
+  color: #000;
+}
+._Panel div.content {
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  background: #fcfcfc;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+._Panel.right {
+  right: 0;
+}
+._Panel.right div.handle {
+  border-radius: 10px 0 0 10px;
+}
+._Panel.right.folded div.handle span {
+  transform: rotate(0deg);
+}
+._Panel.right.unfolded div.handle span {
+  transform: rotate(180deg);
+}._Breadcrumb > ul {
+  white-space: nowrap;
+  list-style: none;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin: 0.5rem 0 1rem 0;
+  padding: 0;
+}
+._Breadcrumb > ul > li.level {
+  margin-bottom: 0;
+}
+._Breadcrumb > ul > li:first-child {
+  padding-left: 0;
+}
+._Breadcrumb > ul > li + li::before {
+  content: ">";
+  font-weight: bold;
+  margin: 0 0.5rem;
+}
+._Breadcrumb a, ._Breadcrumb option[selected] {
+  color: #333;
+}
+._Breadcrumb option:disabled {
+  color: #ccc;
+  font-style: italic;
+}
+._Breadcrumb select, ._Breadcrumb input {
+  padding: 0.1rem 0.2rem;
+  border-radius: 0;
+  border: 1px solid #eee;
+  appearance: none;
+}
+._Breadcrumb select:focus, ._Breadcrumb input:focus {
+  outline: none;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0;
+  border: 1px solid "#f00";
+}
+._Breadcrumb span.autocomplete {
+  width: 25rem;
+  position: relative;
+}
+._Breadcrumb span.autocomplete > div {
+  display: inline-block;
+}
+._Breadcrumb span.autocomplete input {
+  width: 100%;
+  display: inline-block;
+  height: 1.5rem;
+}
+._Breadcrumb span.autocomplete div.results {
+  position: absolute;
+  display: none;
+  top: 1.5rem;
+  left: 0;
+  min-width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 100;
+  height: 0;
+  max-height: 30rem !important;
+  overflow-y: scroll;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0;
+  border: 1px solid #eee;
+}
+._Breadcrumb span.autocomplete div.results::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+._Breadcrumb span.autocomplete div.results::-webkit-scrollbar-thumb {
+  border-radius: 0;
+  transition: background 0.5s ease-out;
+  background: #ccc;
+}
+._Breadcrumb span.autocomplete div.results::-webkit-scrollbar-track {
+  background: #fff;
+}
+._Breadcrumb span.autocomplete div.results.visible {
+  display: block;
+  height: auto;
+}
+._Breadcrumb span.autocomplete ul {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+._Breadcrumb span.autocomplete li {
+  padding: 0.1rem 0.3rem;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+  width: 100%;
+  opacity: 0.8;
+}
+._Breadcrumb span.autocomplete li:last-child {
+  border-bottom: none;
+}
+._Breadcrumb span.autocomplete li:hover {
+  opacity: 1;
+}._Buttons {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+._Buttons.round img.photo {
+  border-radius: 50%;
+}
+._Buttons.round img.check {
+  position: absolute;
+  top: 6%;
+  right: 10%;
+  width: 20%;
+  opacity: 0;
+}
+._Buttons.round .selected img {
+  opacity: 1;
+}
+._Buttons.square img.photo {
+  border-radius: 10%;
+  filter: grayscale(1);
+}
+._Buttons.square img.check {
+  display: none;
+}
+._Buttons.square .selected img.photo {
+  filter: grayscale(0);
+  opacity: 1;
+}
+._Buttons figure {
+  flex: 0 0 30%;
+  position: relative;
+  margin: 0 0 1rem 0 !important;
+}
+._Buttons figure img {
+  transition: all 500ms ease-in-out;
+}
+._Buttons figure figcaption {
+  line-height: 1;
+  font-style: normal !important;
+}
+._Buttons figure > img.photo {
+  opacity: 0.6;
+  width: 70%;
+  border: 3px solid white;
+  cursor: pointer;
+}
+._Buttons figure > img.photo:hover {
+  opacity: 1;
+}
+._Buttons figure.selected figcaption {
+  font-weight: bold;
+}
+@media screen and (max-width: 768px) {
+  ._Buttons figure img.photo {
+    border-width: 1px;
+  }
+}@keyframes blink {
+  0% {
+    stroke-width: 1;
+  }
+  50% {
+    stroke-width: 4;
+  }
+  100% {
+    stroke-width: 1;
+  }
+}
+._Layer path.area {
+  fill: #fff;
+  stroke: #ccc;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+._Layer path.area.clickable {
+  transition: all 200ms ease-in-out;
+  pointer-events: visiblePainted;
+  cursor: pointer;
+}
+._Layer path.area.clickable:hover {
+  stroke-width: 1;
+}
+._Layer path.area.selected {
+  animation: blink 1s linear infinite;
+}
+._Layer g.labels text.label {
+  transition: opacity 500ms ease-in-out;
+  fill: #fff;
+  text-anchor: middle;
+  stroke: #333;
+  stroke-width: 4;
+  user-select: none;
+  pointer-events: none;
+  paint-order: stroke;
+  vector-effect: non-scaling-stroke;
+  opacity: 1;
+}
+._Layer g.labels text.label.invisible {
+  opacity: 0;
 }._Table {
   width: 100%;
   border-top: thin solid black;

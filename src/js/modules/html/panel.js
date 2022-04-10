@@ -12,7 +12,7 @@ const d3=Object.assign({},d3Selection,d3Timer,d3Dispatch);
 class Panel extends Component{
 
     static type='_Panel';
-    static defaultOptions = { anchor: 'right', width: '70%', height:'98%', maxWidth:500, handleWidth:24, initialPosition: 'folded', duration: 1000, delay:0, timer:100000  };
+    static defaultOptions = { anchor: 'right', width: '80%', height:'98%', maxWidth:500, handleWidth:24, initialPosition: 'folded', duration: 1000, delay:0, timer:100000  };
 
     /**
      * CONSTRUCTEUR

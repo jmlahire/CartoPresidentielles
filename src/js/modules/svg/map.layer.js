@@ -116,10 +116,10 @@ class MapLayer extends SvgComponent {
     /**
      * Zoome toutes les couches sur tout ou l'ensemble des polygones. Si vide, zoome sur l'ensemble des polygones
      */
-    zoomOn(geoId){
+    zoomOn(geoId,zoomMargin=1){
         //this.parentComponent.zoomTo(this.container.selectAll('path.area'));
-        if (geoId!==undefined) this.parentComponent.zoomTo(this.container.selectAll(`path.area._${geoId}`));
-        else this.parentComponent.zoomTo(d3.select(`path.${this.id}`));
+        if (geoId!==undefined) this.parentComponent.zoomTo(this.container.selectAll(`path.area._${geoId}`),zoomMargin);
+        else this.parentComponent.zoomTo(d3.select(`path.${this.id}`),zoomMargin);      //?????
         return this;
     }
 
@@ -225,6 +225,7 @@ class MapLayer extends SvgComponent {
                 .each( (d,i,n) => {
                     let data,color,elt = d3.select(n[i]);
                     try {
+
                         data=d.properties[key];
                         //console.log(data);
                         color=palette(data);
@@ -234,12 +235,14 @@ class MapLayer extends SvgComponent {
                       // console.warn(error,d,n[i]);
                         color=this.options.blank || '#000';
                     }
+
                     if (data && this.options.clickable) {
                         elt.style('fill', color)
                             .classed('clickable',true)
                             .on('click', (e,d)=>{
-                                this.select(d)
-                                    .dispatch.call('click',this, { event:e, values:d.properties, id:d.properties[this.options.primary] });
+                                const id=d.properties[this.options.primary];
+                                this.select(id)
+                                    .dispatch.call('click',this, { event:e, values:d.properties, id:id });
                             })
                     }
                     else {
@@ -295,21 +298,21 @@ class MapLayer extends SvgComponent {
 
     /**
      * Applique la classe selected à un path
-     * @param {Object} d            Données brutes correspondant au path sélectionné (contient d.properties)
-     * @param {Boolean} exclusive   Si true, déselectionne les autres entités de même niveau
+     * @param {String} id               Id interne du path
+     * @param {Boolean} exclusive       Si true, déselectionne les autres entités de même niveau
      */
-    select(d,exclusive=true){
-        this.container.selectAll(`path.${this._getId(d)}`).classed('selected',true);
-        if (exclusive) this.container.selectAll(`path.area:not(.${this._getId(d)})`).classed('selected',false);
+    select(id,exclusive=true){
+        this.container.selectAll(`path._${id}`).classed('selected',true);
+        if (exclusive) this.container.selectAll(`path.area:not(._${id})`).classed('selected',false);
         return this;
     }
 
     /**
      * Retire la classe selected à un path
-     * @param {Object} d            Données brutes correspondant au territoire à desélectionner (contient d.properties)
+     * @param {String} id            Données brutes correspondant au territoire à desélectionner (contient d.properties)
      */
-    deselect(d){
-        this.container.selectAll(`path.${this._getId(d)}`).classed('selected',true);
+    deselect(id){
+        this.container.selectAll(`path._${id}`).classed('selected',true);
         return this;
     }
 
@@ -321,6 +324,13 @@ class MapLayer extends SvgComponent {
     deselectAll(){
         this.container.selectAll('path.area.selected').classed('selected',false);
         return this;
+    }
+
+    getNode(id){
+        return this.container.select(`path.area._${id}`).node();
+    }
+    getProperties(id){
+        return this.geodata.find(d=>d.properties[this.options.primary]===id).properties;
     }
 
 

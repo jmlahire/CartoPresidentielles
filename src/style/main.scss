@@ -1,10 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap');
+
 $roboto-serif: 'Roboto Serif', serif;
 $roboto-sans: 'Roboto', sans-serif;
 $roboto-condensed: 'Roboto Condensed', sans-serif;
 $textNormal: '#888';
 $textLight: '#BBB';
 $textDark: '#333';
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    transition: background 0.5s ease-out;
+    background: #fff;
+  }
+  &::-webkit-scrollbar-track {
+    background: #ccc;
+  }
+}
 
 h1,h2,h3,h4,h5,h6 {
   font-family: $roboto-sans;
@@ -23,18 +38,7 @@ svg {
 }
 
 
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 0;
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 2px;
-    transition: background 0.5s ease-out;
-  }
-  &::-webkit-scrollbar-track {
-    background: #efefef;
-  }
-}
+
 
 img {
   -webkit-tap-highlight-color: rgba(0,0,0,0);

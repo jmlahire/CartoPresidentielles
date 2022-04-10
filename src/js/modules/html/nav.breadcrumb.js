@@ -15,7 +15,7 @@ class abstractItem {
     constructor(index){
         this.index=index;
         this.dispatch=d3.dispatch('change');
-        this.container=d3.create('li');
+        this.container=d3.create('li').classed('level',true);
     }
     render(){
         this.container.selectAll('*').remove();
@@ -130,7 +130,6 @@ class selectItem extends abstractItem{
     }
 }
 
-
 class autocompleteItem extends abstractItem{
 
     /**
@@ -140,9 +139,10 @@ class autocompleteItem extends abstractItem{
     constructor(index){
         super(index);
         this.content = d3.create('span').classed('autocomplete',true);
-        this._input= this.content.append('input');
-        this._selection=this.content.append('select');
-
+        this._innerContent=this.content.append('div');
+        this._input= this._innerContent.append('input');
+        this._results=this._innerContent.append('div').classed('results',true)
+                                        .append('ul');
     }
 
     /**
@@ -155,22 +155,70 @@ class autocompleteItem extends abstractItem{
      * @param {String}          [options.labelKey]
      */
     data(data,options){
+        this.options=options;
         this._data=data.map( (row)=> {
             return { value:row[options.valueKey], label:row[options.labelKey], deburr:this._normalize(row[options.labelKey]) }
         } );
         if (options.placeHolder) this._input.attr('placeholder',options.placeHolder);
-        this._input.on('input', (event) => {
-            let text=this._normalize(event.target.value);
-            const results=(text.length>2)?this._search(text):this._search(text,true);
-            this._updateSelection(results);
-            if (results.length){
-                this._selection.classed('visible',results.length)
-                    .on('change', (e)=> {
-                        this.dispatch.call('change',this, {index:this.index, value: e.target.value });
-                    })
-            }
-            else this._selection.classed('visible',false);
-        });
+        let text='';
+        this.results=[];
+        this._input
+            .on('input', (event) => {
+                text=this._normalize(event.target.value);
+                this.results=(text.length>2)?this._search(text):this._search(text,true);
+                this._updateSelection(this.results);
+                if (this.results.length) this._showResults();
+                else this._hideResults();
+            })
+            .on('focus',(event)=> event.target.value='')
+            .on('keydown',(event)=> {
+                if (event.keyCode==13 && this.results.length) {
+                    this._selectOption(this.results[0]);
+                }
+            });
+
+    }
+
+    /**
+     * Donne le focus au champ imput
+     * @returns {autocompleteItem}
+     */
+    focus(){
+        this._input.node().focus();
+        return this;
+    }
+
+    /**
+     * Remet toute la classe à zéro (supprime data, options)
+     * @returns {autocompleteItem}
+     */
+    reset(){
+        delete(this.options);
+        delete(this._data);
+        this._results.selectAll('li').remove();
+        this.setLabel('');
+        return this;
+    }
+
+    /**
+     * Insère un contenu dans l'élement input, à partir de son identifiant
+     * @param {String|Number} value         id de l'élément dans this._data
+     * @returns {autocompleteItem}
+     */
+    setValue(value){
+        const data=this._data.find(d=>d.value===value);
+        this._input.node().value=data.label;
+        return this;
+    }
+
+    /**
+     * Insère un contenu dans l'élement input
+     * @param {String} text                 Texte à afficher
+     * @returns {autocompleteItem}
+     */
+    setLabel(text){
+        this._input.node().value=text;
+        return this;
     }
 
     _normalize(text){
@@ -183,27 +231,54 @@ class autocompleteItem extends abstractItem{
 
     }
     _updateSelection(data) {
-        this._selection
-            .selectAll('option')
+        const highlight= (string,substring) => {
+                //TODO: Mettre en gras la sous chaine recherchée
+        }
+        this._results
+            .selectAll('li')
             .data(data, d=>d.value)
             .join(
-                enter=>enter.append('option')
+                enter=>enter.append('li')
                     .attr('value', d => d.value)
-                    .text(d => d.label),
+                    .html(d => d.label),
                 update=>update
                     .attr('value', d => d.value)
-                    .text(d => d.label),
+                    .html(d => d.label),
                 exit=>exit.remove()
             )
-      /*  if (this._options.placeHolder) this._selection.append('option')
-            .attr('value', '')
-            .property('disabled', true)
-            .property('selected', true)
-            .property('hidden', true)
-            .raise()
-            .text('Déroulez la liste');*/
+            .on('click', (e,d)=> this._selectOption(d));
+
 
     }
+
+    /**
+     * Methode appelée lorsque l'utilisateur clique sur une des options
+     * @param {Object}  d         Données sélectionnées
+     * @private
+     */
+    _selectOption(d){
+        this.setLabel(d.label);
+        this.dispatch.call('change',this,{index:this.index, value:d.value});
+        this._hideResults();
+    }
+
+
+    /**
+     * Cache la liste des propositions
+     * @private
+     */
+    _hideResults(){
+        this.content.select('div.results').classed('visible',false);
+    }
+
+    /**
+     * Montre la liste des propositions
+     * @private
+     */
+    _showResults(){
+        this.content.select('div.results').classed('visible',true);
+    }
+
 
 }
 
@@ -243,7 +318,8 @@ class NavBreadcrumb extends Component{
     }
 
     showLevels(limit=this.levels.length){
-        this.innerContainer.selectAll('li')
+        //TODO: A refactoriser, sale !
+        this.innerContainer.selectAll('li.level')
             .each((d,i,n)=>{
                 d3.select(n[i]).style('display', (i<limit)?'list-item':'none');
             })

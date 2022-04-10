@@ -63,12 +63,13 @@
       opacity:1;
     }
 
-
-
-
-
     &.selected figcaption{
       font-weight:bold;
+    }
+    @media screen and (max-width: 768px) {
+        img.photo{
+          border-width:1px;
+        }
     }
   }
 

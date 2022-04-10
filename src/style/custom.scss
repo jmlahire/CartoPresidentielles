@@ -40,18 +40,31 @@
 }
 
 #boutonsCandidats {
-  figure {
 
+  figure {
+    flex: 0 0 30%;
     max-width:100px;
     order:2;
   }
+
   figure._13, figure._14 {
     max-width:none;
     order:1;
     flex-basis:50%;
     padding:10px 0;
     img {
+      width:40%;
       max-width:100px;
+    }
+  }
+  @media screen and (max-width: 768px) {
+    figure {
+      flex: 0 0 25%;
+    }
+  }
+  @media screen and (max-width: 500px) {
+    figcaption {
+      display:none;
     }
   }
 }

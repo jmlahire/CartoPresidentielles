@@ -164,10 +164,12 @@ function zoomToDept (insee) {
 
     //Zoom-in: zoom sur un département
     if (insee){
-        mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
-        appNavigator.getLevel(1).select(insee);
+
         const candidat = dataCandidats.find(global.candidat);
-      //  console.log(appNavigator.level(1));
+        mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
+        appNavigator.getLevel(1).setValue(insee);
+        appNavigator.getLevel(2).reset();
+
         //Cas A : Carte et données à charger
         if (!mapCommunes[`_${insee}`]) {
 
@@ -178,15 +180,23 @@ function zoomToDept (insee) {
             dataCommunes.ready.then((v)=>{
                 mapCommunes[`_${insee}`].ready.then((geodata)=>{
                     appNavigator.getLevel(2).data(dataCommunes.dataset, {placeHolder: 'Commune', valueKey:'insee', labelKey:'nom'});
+                    appNavigator.getLevel(2).dispatch.on('change', (d)=>{
+                        let data = mapCommunes[`_${insee}`].getProperties(d.value);
+                        mapCommunes[`_${insee}`].select(d.value).zoomOn(d.value,.5);
+                        appBox.push({ event:{pageX:100,pageY:100}, values:data, id:d.value});
+
+                    });
                     appNavigator.showLevels(3);
                     mapCommunes[`_${insee}`]
                         .appendTo(mapContainer)
                         .render()
                         .join(dataCommunes)
                         .fill ( candidat.key, { colors: paletteColors(candidat)})
-                        // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
                         .labels(dataPrefectures,'COM','NCCENR');
-                    mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
+                    mapCommunes[`_${insee}`].dispatch.on('click',(e,d)=>{
+                        appNavigator.getLevel(2).setLabel(e.values.NCCENR);
+                        appBox.push(e);
+                    } );
                 })
 
 
@@ -198,20 +208,10 @@ function zoomToDept (insee) {
         //Cas B : carte et données déjà chargés
         else {
             mapCommunes[`_${insee}`].fadeIn();
-          //  mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
             //mapDepartements.zoomOn(insee);
         }
 
         mapDepartements.zoomOn(insee);
-
-
-            /*
-            appBox.reset()
-                .title(param.values.NCCENR)
-                .content(param.values)
-               // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
-                .position(param.event)
-                .show();*/
 
     }
     //Zoom-out: retour carte de France
@@ -238,21 +238,22 @@ function zoomToDept (insee) {
 const   appTitle =          new Title('Titre',['titre','candidat']);
 const   appNavigator =      new NavBreadcrumb('Navigator');
 const   appPanel =          new Panel('candPanel');
-const   appSelector =   new NavButtons('boutonsCandidats',{label:'', style:'square'});
+const   appSelector =       new NavButtons('boutonsCandidats',{label:'', style:'square'});
 
 
 
 const appBox =  new ContentBox('ContentBox');
-appBox.push=function(param){
-    const values=param.values;
-    console.log(dataCandidats.find(1));
+/**
+ * Ajoute une méthode maison à appBox pour l'affichage des données
+ * @param {Object} params           d.properties
+ * @type {any}
+ */
+appBox.push=function(params){
+    const values=params.values;
     this.reset()
-        .title(param.values.NCCENR)
-
-        .text('Participation: '+(100-values.nb_voix13)+'%',{align:'right'});
-
-    const table=this.table()
-        .tr([ { v:'Candidat',colspan:2},{v:'Suffrages', align:'right'},{v:'Résultat',align:'right'}],{tag:'th'});
+        .title(values.NCCENR)
+        .text('Participation: '+(100-values.voix13)+'%',{align:'right'});
+    const table=this.table().tr([ { v:'Candidat',colspan:2},{v:'Suffrages', align:'right'},{v:'Résultat',align:'right'}],{tag:'th'});
     const order=[];
     for (let i=1;i<=12;i++){
         order.push({i:i,v:values[`nb_voix${i}`]});
@@ -266,10 +267,8 @@ appBox.push=function(param){
         .tr([ { v: 'Inscrits'},{ v: values.nb_inscrits, f:'int'} ] )
         .tr([ { v: 'Votants'},{ v: values.nb_votants, f:'int'} ] )
         .tr([ { v: 'Suffrages exprimés'},{ v: values.nb_exprimes, f:'int'} ] );
-    this       .position(param.event).show();
-console.log(values);
-
-}.bind(appBox)
+     this.position(params.event).show();
+}.bind(appBox);
 
 
 /**************************************** CARTES ***************************************/
@@ -314,14 +313,15 @@ Promise.all([ dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
     appBox.appendTo('mainMap');
 
     appNavigator.setLevel(0,'label')
-                .setLevel(1,'select')
-        .setLevel(2,'autocomplete');
+                .setLevel(1,'autocomplete')
+                .setLevel(2,'autocomplete');
     appNavigator.getLevel(0).data('France');
-    appNavigator.getLevel(1).data(dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
+  //  appNavigator.getLevel(1).data(dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
+    appNavigator.getLevel(1).data(dataDepartements.dataset, {placeHolder: 'Département', valueKey:'insee', labelKey:'nom'});
+       // .data(dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
     appNavigator.getLevel(2).hide();
-  //  appNavigator.getLevel(2).data(dataDepartements.dataset, {placeHolder: 'Commune', valueKey:'insee', labelKey:'nom'});
-    appNavigator.appendTo('mainHeader');
-    appNavigator.render();
+    appNavigator.appendTo('mainHeader')
+                .render();
     appNavigator.dispatch.on('change',(d)=> {
         if (d.index===0) global.departement=0;
         else if (d.index===1) zoomToDept(d.value);
@@ -340,52 +340,14 @@ Promise.all([ dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
 
 
 
-
-
-
-
-  /*  appDeptSelector.container
-        .append('a')
-        .attr('href','#')
-        .style('margin-left','3rem')
-        .text('Retour à la carte de France')
-        .on('click', ()=> global.departement=0);*/
-
     mapDepartements
         .render()
         .join (dataDepartements)
         .dispatch.on('click',(v)=> zoomToDept(v.id));
 
-
-
-
-
-    //new Title('titrePano',['text']).text('text','Candidats').render().appendTo(appCandSelector);
-
-
-
-   /* appDeptSelector
-        .data( refDepartements.toGroups('reg_nom'), { nested:true, nameKey:'departement', valueKey: 'id' } )
-        .dispatch.on('change', zoomToDept);*/
-
-
     global.candidat=1;
 
 
-
-
-
-
-
-
-
-/*
-
-    setTimeout(()=>{
-        let u=appNavigator.level(1);
-        u.select('54');
-     //   global.departement=0;
-    },4000);*/
 
 
 });
