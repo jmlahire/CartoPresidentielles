@@ -41,7 +41,7 @@ class MapComposition extends Svg{
             .scaleExtent([1, 15])
             .translateExtent([[0, 0], [this.size.width, this.size.height]])
             .on('zoom', (e) => this._handleZoom.call(this,e) );
-        this._zoomable=this.options.zoomable;
+        this._freezoom=this.options.zoomable;
     }
 
 
@@ -51,10 +51,10 @@ class MapComposition extends Svg{
      * @private
      */
     _handleZoom(e) {
-        console.log(e.sourceEvent, this._zoomable);
+       // console.log(e.sourceEvent, this._freezoom);
 
-        if ( (e.sourceEvent && this._zoomable) || e.sourceEvent===null) {
-            console.log('  -> passed');
+        if ( (e.sourceEvent && this._freezoom) || e.sourceEvent===null) {
+         //   console.log('  -> passed');
             //Transformation
             this.innerContainer.attr('transform', `translate(${this.size.margins.left+e.transform.x} ${this.size.margins.top+e.transform.y}) scale(${e.transform.k})`);
             //Maintien de l'échelle et disparition des étiquettes
@@ -74,7 +74,7 @@ class MapComposition extends Svg{
     zoomTo(selection){
         this.enqueue( () => new Promise((resolve, reject) => {
             selection = [selection.node()];
-            this._zoomable = false;
+            this._freezoom = false;
             //Calcul du zoom
 
             const getBoundaries = (selection) => {
@@ -108,7 +108,7 @@ class MapComposition extends Svg{
 //                    const newBounds = getBoundaries(selection);
                     this.zoom.scaleExtent([1, finalTransform.k * 4]);
                     this.outerContainer.call(this.zoom, finalTransform);
-                    this._zoomable = this.options.zoomable;
+                    this._freezoom = this.options.zoomable;
 
                     resolve(this);
                 });
@@ -121,7 +121,7 @@ class MapComposition extends Svg{
 
     zoomOut(){
         this.enqueue( () => new Promise((resolve, reject) => {
-            this._zoomable = false;
+            this._freezoom = false;
             let finalTransform = d3.zoomIdentity
                 .translate(0, 0)
                 .scale(1);
@@ -133,7 +133,7 @@ class MapComposition extends Svg{
                 .on('end', () => {
                     this.zoom.scaleExtent([1, finalTransform.k * 4]);
                     this.outerContainer.call(this.zoom, finalTransform);
-                    this._zoomable = this.options.zoomable;
+                    this._freezoom = this.options.zoomable;
                     resolve(this);
                 });
         }));

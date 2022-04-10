@@ -4,7 +4,11 @@ body {
 
 g._Layer path.area {
   stroke: #fff;
-}#mainContainer {
+}#Titre {
+  margin-bottom: 1rem;
+}
+
+#mainContainer {
   max-width: 800px;
   margin: auto;
   background: #fff;

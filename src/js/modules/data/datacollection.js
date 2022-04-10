@@ -39,7 +39,7 @@ class DataCollection {
     }
 
     get primary(){
-        return this._primary || 'id';
+        return this._primary;
     }
 
     set primary(keyName){

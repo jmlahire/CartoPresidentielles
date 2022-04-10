@@ -1741,7 +1741,7 @@
     }
 
     get primary() {
-      return this._primary || 'id';
+      return this._primary;
     }
 
     set primary(keyName) {
@@ -13794,7 +13794,7 @@
       this.projection = d3$2.geoMercator();
       this.path = d3$2.geoPath();
       this.zoom = d3$2.zoom().scaleExtent([1, 15]).translateExtent([[0, 0], [this.size.width, this.size.height]]).on('zoom', e => this._handleZoom.call(this, e));
-      this._zoomable = this.options.zoomable;
+      this._freezoom = this.options.zoomable;
     }
     /**
      * Méthode interne appelée lors du zoom
@@ -13804,11 +13804,10 @@
 
 
     _handleZoom(e) {
-      console.log(e.sourceEvent, this._zoomable);
-
-      if (e.sourceEvent && this._zoomable || e.sourceEvent === null) {
-        console.log('  -> passed'); //Transformation
-
+      // console.log(e.sourceEvent, this._freezoom);
+      if (e.sourceEvent && this._freezoom || e.sourceEvent === null) {
+        //   console.log('  -> passed');
+        //Transformation
         this.innerContainer.attr('transform', `translate(${this.size.margins.left + e.transform.x} ${this.size.margins.top + e.transform.y}) scale(${e.transform.k})`); //Maintien de l'échelle et disparition des étiquettes
 
         const labels = this.innerContainer.selectAll('text.label');
@@ -13829,7 +13828,7 @@
     zoomTo(selection) {
       this.enqueue(() => new Promise((resolve, reject) => {
         selection = [selection.node()];
-        this._zoomable = false; //Calcul du zoom
+        this._freezoom = false; //Calcul du zoom
 
         const getBoundaries = selection => {
           const bounds = {
@@ -13862,7 +13861,7 @@
           //                    const newBounds = getBoundaries(selection);
           this.zoom.scaleExtent([1, finalTransform.k * 4]);
           this.outerContainer.call(this.zoom, finalTransform);
-          this._zoomable = this.options.zoomable;
+          this._freezoom = this.options.zoomable;
           resolve(this);
         }); //console.log(this.zoom.transform);
       }));
@@ -13871,12 +13870,12 @@
 
     zoomOut() {
       this.enqueue(() => new Promise((resolve, reject) => {
-        this._zoomable = false;
+        this._freezoom = false;
         let finalTransform = d3$2.zoomIdentity.translate(0, 0).scale(1);
         this.outerContainer.transition().delay(this.options.delay).duration(this.options.duration).call(this.zoom.transform, finalTransform).on('end', () => {
           this.zoom.scaleExtent([1, finalTransform.k * 4]);
           this.outerContainer.call(this.zoom, finalTransform);
-          this._zoomable = this.options.zoomable;
+          this._freezoom = this.options.zoomable;
           resolve(this);
         });
       }));
@@ -14094,14 +14093,13 @@
 
   const svgMapRegister = new MapRegister();
 
-  const d3$1 = Object.assign({}, d3Selection, d3Geo, d3Dispatch, d3Fetch, d3Transition);
+  const d3$1 = Object.assign({}, d3Selection, d3Geo, d3Dispatch, d3Fetch, d3Transition, d3Array, d3Scale, d3Interpolate);
 
   class MapLayer extends SvgComponent {
     static type = '_Layer';
     static defaultOptions = {
       autofit: false,
-      valuesKey: 'extra',
-      blank: '#fff',
+      blank: '#eee',
       clickable: true
     };
 
@@ -14211,17 +14209,28 @@
       }));
       return this;
     }
+    /**
+     * Fusionne un jeu de données à la couche (les données ajoutées seront ajoutées à d.properties)
+     * @param {DataCollection} dataCollection       Données (instance de DataCollection)
+     * @param {String} [dataKey]                    Clé primaire des données supplémentaires utilisée pour l'association. Si vide, la méthode essaiera de chercher la clé primaire de dataCollection
+     * @param {String} [geoKey]                      Clé primaire des données de la couche utilisée pour l'association. Si vide, la méthode utiliser la clé primaire de la couche
+     * @returns {MapLayer}
+     */
 
-    join(dataCollection, dataKey = 'id', geoKey) {
+
+    join(dataCollection, dataKey, geoKey) {
       geoKey = geoKey || this.options.primary;
+      dataKey = dataKey || dataCollection.primary;
       this.enqueue(() => new Promise((resolve, reject) => {
         dataCollection.ready.then(data => {
           data = data.exportToMap(dataKey);
-          this.container.selectAll("path").each((d, i, n) => {
-            d3$1.select(n[i]);
-                  const id = d.properties[geoKey],
+          this.container.selectAll("path").each(d => {
+            const id = d.properties[geoKey],
                   datum = data.get(id);
-            d.properties[this.options.valuesKey] = Array.isArray(datum) ? datum[0] : undefined;
+
+            if (Array.isArray(datum)) {
+              Object.assign(d.properties, datum[0]);
+            }
           });
           resolve(this);
         });
@@ -14229,23 +14238,83 @@
       return this;
     }
     /**
-     * Dessine une carte chloroplethe
-     * @param colorFn {Function} : fonction convertissant la valeur en couleur
-     * @param accessorFn {Function} : accesseur permettant d'accéder à la propriété qui contient les valeurs (à partir de d.properties) Ex: d=>d.properties.myvalue
+     * Calcule les domaines (et les moyennes et médianes) des données contenues dans d.properties: ils seront disponibles dans this.metadata
+     * @param {Array|String} keys           Clés des données dont il faut calculer les statistiques
+     * @param {Array} [type]                Statistiques à calculer parmi les suivantes: domain, sum, count, median, deviation
+     */
+
+
+    statistics(keys, types = ['domain', 'mean']) {
+      const calcRound = v => Math.round(v * 10000) / 10000;
+
+      const calcFunction = {
+        domain: d3$1.extent,
+        sum: d3$1.sum,
+        count: d3$1.count,
+        mean: v => calcRound(d3$1.mean(v)),
+        median: v => calcRound(d3$1.median(v)),
+        deviation: v => calcRound(d3$1.deviation(v, .1))
+      };
+      this.enqueue(() => new Promise((resolve, reject) => {
+        this.metadata = this.metadata || {};
+        if (typeof keys === 'string') keys = [keys];
+        types.forEach(prop => this.metadata[prop] = this.metadata[prop] || {});
+        types = types.reduce((a, v) => ({ ...a,
+          [v]: true
+        }), {});
+        Object.keys(calcFunction).forEach(t => {
+          keys.forEach(k => {
+            let data = this.geodata.map(d => d.properties[k]);
+            if (types[t]) this.metadata[t][k] = calcFunction[t](data);
+          });
+        });
+        resolve(this);
+      }));
+      return this;
+    }
+    /**
+     * Crée une carte chloroplethe
+     * @param {String}      key                     Clé des données à utiliser (dans d.properties)
+     * @param {Object}      [options]               Options
+     * @param {String}      [options.colors]        Couleur à utiliser (si 2 échelle linéaire, si 3 échelle divergente)
+     * @param {Array}       [options.domain]        Focce le domain (sinon utilise le domaine courant)
      * @returns {MapLayer}
      */
 
 
-    fill(colorFn, accessorFn) {
+    fill(key, options = {}) {
+      options = { ...{
+          colors: ['#fff', '#000'],
+          clamp: true
+        },
+        ...options
+      };
+      this.statistics(key, ['domain', 'mean']);
       this.enqueue(() => new Promise((resolve, reject) => {
+        //Assignation du domaine s'il n'est pas fourni
+        if (!options.domain) {
+          //Par défaut, domaine de type [min,max]
+          //  if (!this.metadata.domain[key]) this.statistics(key,['domain']);
+          options.domain = this.metadata.domain[key]; //Si 3 couleurs en paramètre, échelle divergente -> on insère la moyenne dans le domaine [min,mean,max]
+
+          if (options.colors.length === 3) {
+            //    if (!this.metadata.mean[key]) this.statistics(key,['mean']);
+            options.domain = [options.domain[0], this.metadata.mean[key], options.domain[1]];
+          }
+        } //Coloriage
+
+
+        const palette = this._fillPalette(options);
+
         this.container.selectAll("path.area").each((d, i, n) => {
           let data,
               color,
               elt = d3$1.select(n[i]);
 
           try {
-            data = accessorFn(d);
-            color = colorFn(data); //  console.log(data,color,colorFn.domain());
+            data = d.properties[key]; //console.log(data);
+
+            color = palette(data); //  console.log(data,color,colorFn.domain());
           } catch (error) {
             data = null; // console.warn(error,d,n[i]);
 
@@ -14267,6 +14336,10 @@
         resolve(this);
       }));
       return this;
+    }
+
+    _fillPalette(options) {
+      return d3$1.scaleLinear().range(options.colors).domain(options.domain).interpolate(d3$1.interpolateLab).clamp(options.clamp);
     }
 
     labels(dataCollection, dataKey, labelKey, options) {
@@ -14327,8 +14400,50 @@
 
   }
 
-  const d3 = Object.assign({}, d3Array, d3Interpolate, d3Scale);
-  /************************************* FONCTIONS ****************************************/
+  const d3 = Object.assign({}, d3Array, d3Scale);
+  /************************************** GLOBAL *******************************************/
+
+  /**
+   * Proxy permettant de modifier la carte en modifiant ses propriétés
+   * Valeurs possibles
+   *      candidat: numero du candidat
+   *      departement: identifiant du département (0 pour France entière)
+   *      palette: linear ou diverging
+   */
+
+  const global$1 = new Proxy({
+    candidat: 1,
+    departement: 0,
+    palette: 'linear'
+  }, {
+    get: (target, prop, receiver) => {
+      return target[prop];
+    },
+    set: (target, prop, value, receiver) => {
+      appPanel.fold({
+        delay: 200
+      }); //Modification candidat
+
+      if (prop === 'candidat') {
+        target.candidatData = dataCandidats.find(value);
+
+        if (target.candidatData) {
+          target[prop] = value;
+          updateTitle();
+          updateMaps();
+        }
+      } //Changement département (0 = France entière)
+      else if (prop === 'departement') {
+        target[prop] = value;
+        zoomToDept(value);
+      } else if (prop === 'palette') {
+        target[prop] = value;
+      }
+
+      return true;
+    }
+  });
+  /************************************* DONNEES ****************************************/
 
   /**
    * Mapper pour les fichiers de résultats par communes au format csv
@@ -14336,13 +14451,13 @@
    * @returns {*}
    */
 
-  const dataMapperCom = row => {
+  function dataMapperCom(row) {
     for (const [key, value] of Object.entries(row)) {
       row[key] = ['dep', 'insee', 'nom'].includes(key) ? row[key] : parseFloat(row[key]);
     }
 
     return row;
-  };
+  }
   /**
    * Mapper pour les fichiers de résultats par departements au format csv
    * @param row
@@ -14350,13 +14465,13 @@
    */
 
 
-  const dataMapperDep = row => {
+  function dataMapperDep(row) {
     for (const [key, value] of Object.entries(row)) {
       if (key.substring(0, 2) === 'nb' || key === 'tncc' || key === 'reg_insee') row[key] = parseInt(row[key]);else if (key.substring(0, 4) === 'voix' || key === 'participation') row[key] = parseFloat(row[key]);
     }
 
     return row;
-  };
+  }
   /**
    * Mapper pour le fichier candidats
    * @param row
@@ -14364,22 +14479,89 @@
    */
 
 
-  const dataMapperCand = row => {
+  function dataMapperCand(row) {
     for (const [key, value] of Object.entries(row)) {
       row[key] = ['id', 'dep_min', 'dep_max', 'dep_moy', 'dep_med', 'com_min', 'com_max', 'com_moy', 'com_med', 'fr_moy'].includes(key) ? parseFloat(row[key]) : row[key];
     }
 
     return row;
-  };
+  }
+
+  const dataCandidats = new DataCollection('candidats').load('././assets/data/candidats-test.csv', {
+    primary: 'id',
+    delimiter: ';',
+    mapper: dataMapperCand
+  });
+  const dataDepartements = new DataCollection('resParDept').load('././assets/data/departements-test.csv', {
+    primary: 'insee',
+    delimiter: ';',
+    mapper: dataMapperDep
+  });
+  const dataPrefectures = new DataCollection('prefectures').load('././assets/geodata/prefectures.csv', {
+    primary: 'COM',
+    mapper: row => row
+  }); //************************************ FONCTIONS ******************************************************
+
+  /**
+   * Met le titre à jour
+   */
+
+  function updateTitle() {
+    let t, n;
+
+    switch (global$1.candidat) {
+      case 13:
+        t = 'Cartographie de l\'';
+        n = 'abstention';
+        break;
+
+      case 14:
+        t = 'Cartographie du ';
+        n = 'vote blanc';
+        break;
+
+      default:
+        t = 'Cartographie du vote ';
+        n = global$1.candidatData.nom;
+    }
+
+    appTitle.text('titre', t).text('candidat', n, [`color:${global$1.candidatData.couleur}`, 'font-weight:bold']).render();
+  }
+  /**
+   * Renvoie le jeu de couleurs pour l'affichage des cartes
+   * @param {Int} candidat        numero du candidat
+   * @returns {(string|*)[]|string[]}
+   */
+
+
+  function paletteColors(candidatData) {
+    if (global$1.palette === 'linear') return ['#fff', candidatData.couleur];else if (global$1.palette === 'diverging') return ['red', 'yallow', 'green'];
+  }
+  /**
+   * Met à jour les cartes chloroplethes avec les données courantes (global.candidat et global.palette)
+   */
+
+
+  function updateMaps() {
+    //   console.log(paletteColors(global.candidat));
+    mapDepartements.fill(global$1.candidatData.key, {
+      colors: paletteColors(global$1.candidatData)
+    });
+
+    for (const [key, myMap] of Object.entries(mapCommunes)) {
+      myMap.fill(global$1.candidatData.key, {
+        colors: paletteColors(global$1.candidatData)
+      });
+    }
+  }
   /**
    * Zoome sur un departement
    * @param insee
    */
 
 
-  const zoomToDept = insee => {
-    appBox.hide();
-    appPanel.fold(); //Zoom-in: zoom sur un département
+  function zoomToDept(insee) {
+    appBox.hide(); //Zoom-in: zoom sur un département
 
     if (insee) {
       mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
@@ -14406,12 +14588,13 @@
               labelKey: 'nom'
             });
             appNavigator.showLevels(3);
-            mapCommunes[`_${insee}`].appendTo(mapContainer).render().join(dataCommunes, 'insee').fill(colorFactory(candidat.couleur, dataCommunes.col(candidat.key)), d => d.properties.extra[candidat.key]) // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
+            mapCommunes[`_${insee}`].appendTo(mapContainer).render().join(dataCommunes).fill(candidat.key, {
+              colors: paletteColors(candidat)
+            }) // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
             .labels(dataPrefectures, 'COM', 'NCCENR');
             mapCommunes[`_${insee}`].dispatch.on('click', appBox.push);
           });
-        }); //AJOUTER PROMESSE dataCommunes.ready
-        // mapContainer.zoomable(true);
+        }); // mapContainer.zoomable(true);
       } //Cas B : carte et données déjà chargés
       else {
         mapCommunes[`_${insee}`].fadeIn(); //  mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
@@ -14433,46 +14616,7 @@
       mapContainer.fadeOutLayers(`.communes`);
       mapContainer.zoomOut();
     }
-  };
-  /**
-   * Renvoie un interplateur données -> couleurs
-   * @param baseColor
-   * @param data
-   * @returns {*}
-   */
-
-
-  const colorFactory = (baseColor, data) => {
-    // console.log(data,Math.min(...data),Math.max(...data));
-    return d3.scaleLinear().range([baseColor, '#eee']).domain([d3.min(data), d3.max(data)]).interpolate(d3.interpolateLab);
-  };
-  /**
-   * Modifie le titre
-   * @param {Object} candidat         Données du candidat
-   */
-
-
-  const changeTitle = candidat => {
-    let t, n;
-
-    switch (candidat.id) {
-      case 13:
-        t = 'Cartographie de l\'';
-        n = 'abstention';
-        break;
-
-      case 14:
-        t = 'Cartographie du ';
-        n = 'vote blanc';
-        break;
-
-      default:
-        t = 'Cartographie du vote ';
-        n = candidat.nom;
-    }
-
-    appTitle.text('titre', t).text('candidat', n, [`color:${candidat.couleur}`, 'font-weight:bold']).render();
-  };
+  }
   /************************************** COMPOSANTS *******************************************/
 
 
@@ -14486,7 +14630,7 @@
   const appBox = new ContentBox('ContentBox');
 
   appBox.push = function (param) {
-    const values = param.values.extra;
+    const values = param.values;
     console.log(dataCandidats.find(1));
     this.reset().title(param.values.NCCENR).text('Participation: ' + (100 - values.nb_voix13) + '%', {
       align: 'right'
@@ -14547,68 +14691,15 @@
     this.position(param.event).show();
     console.log(values);
   }.bind(appBox);
-  /************************************** DONNEES *******************************************/
-
-
-  const global$1 = new Proxy({
-    candidat: 1,
-    departement: 0
-  }, {
-    get: (target, prop, receiver) => {
-      return target[prop];
-    },
-    set: (target, prop, value, receiver) => {
-      //Modification candidat
-      if (prop === 'candidat') {
-        const candidat = dataCandidats.find(value);
-
-        if (candidat) {
-          target.candidat = value;
-          changeTitle(candidat);
-          appPanel.fold({
-            delay: 500
-          }); // console.warn(candidat);
-
-          mapDepartements.fill(colorFactory(candidat.couleur, dataDepartements.col(candidat.key)), d => d.properties.extra[candidat.key]); //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
-
-          for (const [key, myMap] of Object.entries(mapCommunes)) {
-            let dataMap = myMap.geodata.filter(d => d.properties.extra).map(d => d.properties.extra[candidat.key]);
-            myMap.fill(colorFactory(candidat.couleur, dataMap), d => d.properties.extra[candidat.key]);
-          } // mapCommunes.forEach( m=> console.log(m));
-
-
-          return true;
-        }
-      } //Changement département (0 = France entière)
-      else if (prop === 'departement') {
-        zoomToDept(value);
-      }
-
-      return true;
-    }
-  });
-  const dataCandidats = new DataCollection('candidats').load('././assets/data/candidats-test.csv', {
-    primary: 'id',
-    delimiter: ';',
-    mapper: dataMapperCand
-  });
-  const dataDepartements = new DataCollection('resParDept').load('././assets/data/departements-test.csv', {
-    primary: 'insee',
-    delimiter: ';',
-    mapper: dataMapperDep
-  });
-  const dataPrefectures = new DataCollection('prefectures').load('././assets/geodata/prefectures.csv', {
-    primary: 'COM',
-    mapper: row => row
-  });
   /**************************************** CARTES ***************************************/
 
-  const mapCommunes = {},
-        mapContainer = new MapComposition('maCarte').appendTo('mainMap'),
+
+  const mapContainer = new MapComposition('maCarte').appendTo('mainMap'),
         mapDepartements = new MapLayer('departements', {
     autofit: true,
     primary: 'DEP'
-  }).appendTo(mapContainer).load('././assets/geomap/departements.topojson'); //Modifie l'opacité de la couche départements en fonction du niveau de zoom
+  }).appendTo(mapContainer).load('././assets/geomap/departements.topojson');
+  const mapCommunes = {}; //Modifie l'opacité de la couche départements en fonction du niveau de zoom
 
   const zoomScaleDep = d3.scaleLinear().domain([1, 7]).range([1, 0.05]).clamp(true),
         zoomScaleCom = d3.scaleLinear().domain([1, 6]).range([0, 1]).clamp(true);
@@ -14659,7 +14750,7 @@
           .text('Retour à la carte de France')
           .on('click', ()=> global.departement=0);*/
 
-    mapDepartements.render().join(dataDepartements, 'insee').dispatch.on('click', v => zoomToDept(v.id)); //new Title('titrePano',['text']).text('text','Candidats').render().appendTo(appCandSelector);
+    mapDepartements.render().join(dataDepartements).dispatch.on('click', v => zoomToDept(v.id)); //new Title('titrePano',['text']).text('text','Candidats').render().appendTo(appCandSelector);
 
     /* appDeptSelector
          .data( refDepartements.toGroups('reg_nom'), { nested:true, nameKey:'departement', valueKey: 'id' } )

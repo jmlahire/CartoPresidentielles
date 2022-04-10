@@ -3,11 +3,14 @@ import * as d3Dispatch from 'd3-dispatch'
 import * as d3Fetch from 'd3-fetch'
 import * as d3Geo from 'd3-geo'
 import * as d3Transition from 'd3-transition'
+import * as d3Array from 'd3-array'
+import * as d3Scale from 'd3-scale'
+import * as d3Interpolate from 'd3-interpolate'
 import * as topojson from 'topojson-client'
 import {SvgComponent} from './component.js'
 import {svgMapRegister} from './map.register'
 
-const d3=Object.assign({},d3Selection,d3Geo,d3Dispatch,d3Fetch,d3Transition);
+const d3=Object.assign({},d3Selection,d3Geo,d3Dispatch,d3Fetch,d3Transition,d3Array,d3Scale,d3Interpolate);
 
 
 
@@ -15,7 +18,7 @@ const d3=Object.assign({},d3Selection,d3Geo,d3Dispatch,d3Fetch,d3Transition);
 class MapLayer extends SvgComponent {
 
     static type = '_Layer';
-    static defaultOptions= { autofit:false, valuesKey:'extra', blank:'#fff', clickable:true };
+    static defaultOptions= { autofit:false, blank:'#eee', clickable:true };
 
     constructor(id, options={}){
         super(id);
@@ -132,17 +135,26 @@ class MapLayer extends SvgComponent {
     }
 
 
-    join(dataCollection, dataKey='id', geoKey){
+    /**
+     * Fusionne un jeu de données à la couche (les données ajoutées seront ajoutées à d.properties)
+     * @param {DataCollection} dataCollection       Données (instance de DataCollection)
+     * @param {String} [dataKey]                    Clé primaire des données supplémentaires utilisée pour l'association. Si vide, la méthode essaiera de chercher la clé primaire de dataCollection
+     * @param {String} [geoKey]                      Clé primaire des données de la couche utilisée pour l'association. Si vide, la méthode utiliser la clé primaire de la couche
+     * @returns {MapLayer}
+     */
+    join(dataCollection, dataKey, geoKey){
         geoKey = geoKey || this.options.primary;
+        dataKey = dataKey || dataCollection.primary;
         this.enqueue( () => new Promise((resolve, reject) => {
             dataCollection.ready.then( (data)=> {
                 data=data.exportToMap(dataKey);
                 this.container.selectAll("path")
-                    .each( (d,i,n) => {
-                        const   elt = d3.select(n[i]),
-                                id = d.properties[geoKey],
+                    .each( (d) => {
+                        const   id = d.properties[geoKey],
                                 datum = data.get(id);
-                        d.properties[this.options.valuesKey]=(Array.isArray((datum)))?datum[0]:undefined;
+                        if (Array.isArray((datum))) {
+                            Object.assign(d.properties,datum[0]);
+                        }
                     });
                 resolve(this);
             });
@@ -150,23 +162,72 @@ class MapLayer extends SvgComponent {
         return this;
     }
 
+    /**
+     * Calcule les domaines (et les moyennes et médianes) des données contenues dans d.properties: ils seront disponibles dans this.metadata
+     * @param {Array|String} keys           Clés des données dont il faut calculer les statistiques
+     * @param {Array} [type]                Statistiques à calculer parmi les suivantes: domain, sum, count, median, deviation
+     */
+    statistics(keys, types=['domain','mean']){
+        const   calcRound = (v) => Math.round(v*10000)/10000;
+        const   calcFunction= {
+            domain:d3.extent,
+            sum:d3.sum,
+            count:d3.count,
+            mean: (v) => calcRound(d3.mean(v)),
+            median: (v) => calcRound(d3.median(v)),
+            deviation: (v) => calcRound(d3.deviation(v,.1))
+        }
+        this.enqueue( () => new Promise((resolve, reject) => {
+            this.metadata = this.metadata || {};
+            if (typeof keys === 'string') keys = [keys];
+            types.forEach( prop => this.metadata[prop]= this.metadata[prop] || {} );
+            types=types.reduce((a, v) => ({ ...a, [v]: true}), {});
+            Object.keys(calcFunction)
+                .forEach( (t) => {
+                    keys.forEach((k) => {
+                            let data = this.geodata.map(d => d.properties[k]);
+                            if (types[t]) this.metadata[t][k]=calcFunction[t](data);
+                    })
+            });
+            resolve(this);
+        }));
+        return this;
+
+    }
 
 
     /**
-     * Dessine une carte chloroplethe
-     * @param colorFn {Function} : fonction convertissant la valeur en couleur
-     * @param accessorFn {Function} : accesseur permettant d'accéder à la propriété qui contient les valeurs (à partir de d.properties) Ex: d=>d.properties.myvalue
+     * Crée une carte chloroplethe
+     * @param {String}      key                     Clé des données à utiliser (dans d.properties)
+     * @param {Object}      [options]               Options
+     * @param {String}      [options.colors]        Couleur à utiliser (si 2 échelle linéaire, si 3 échelle divergente)
+     * @param {Array}       [options.domain]        Focce le domain (sinon utilise le domaine courant)
      * @returns {MapLayer}
      */
-    fill(colorFn, accessorFn ){
+    fill(key, options={ } ){
+        options={...{ colors:['#fff','#000'],clamp:true },...options};
+        this.statistics(key,['domain','mean']);
         this.enqueue( () => new Promise((resolve, reject) => {
+            //Assignation du domaine s'il n'est pas fourni
+            if (!options.domain)  {
+                //Par défaut, domaine de type [min,max]
+              //  if (!this.metadata.domain[key]) this.statistics(key,['domain']);
+                options.domain=this.metadata.domain[key];
+                //Si 3 couleurs en paramètre, échelle divergente -> on insère la moyenne dans le domaine [min,mean,max]
+                if (options.colors.length===3) {
+                //    if (!this.metadata.mean[key]) this.statistics(key,['mean']);
+                    options.domain=[options.domain[0],this.metadata.mean[key],options.domain[1]];
+                }
+            }
+            //Coloriage
+            const palette=this._fillPalette(options);
             this.container.selectAll("path.area")
                 .each( (d,i,n) => {
                     let data,color,elt = d3.select(n[i]);
                     try {
-                        data=accessorFn(d);
-
-                        color=colorFn(data);
+                        data=d.properties[key];
+                        //console.log(data);
+                        color=palette(data);
                       //  console.log(data,color,colorFn.domain());
                     }catch(error){
                         data=null;
@@ -191,6 +252,14 @@ class MapLayer extends SvgComponent {
             resolve(this);
         }));
         return this;
+    }
+
+    _fillPalette(options){
+            return d3.scaleLinear()
+                .range(options.colors)
+                .domain(options.domain)
+                .interpolate(d3.interpolateLab)
+                .clamp(options.clamp);
     }
 
     labels(dataCollection,dataKey,labelKey, options){

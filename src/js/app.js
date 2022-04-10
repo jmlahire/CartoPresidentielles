@@ -14,21 +14,56 @@ import {MapLayer} from './modules/svg/map.layer';
 
 import * as d3Array from 'd3-array'
 import * as d3Scale from 'd3-scale'
-import * as d3Interpolate from 'd3-interpolate'
-const d3=Object.assign({},d3Array,d3Interpolate,d3Scale);
+const d3=Object.assign({},d3Array,d3Scale);
+
+
+/************************************** GLOBAL *******************************************/
+
+/**
+ * Proxy permettant de modifier la carte en modifiant ses propriétés
+ * Valeurs possibles
+ *      candidat: numero du candidat
+ *      departement: identifiant du département (0 pour France entière)
+ *      palette: linear ou diverging
+ */
+const global = new Proxy( { candidat:1, departement:0, palette:'linear' } , {
+    get: (target, prop, receiver)=> {
+        return target[prop];
+    },
+    set: (target, prop, value, receiver) => {
+
+        appPanel.fold({delay:200});
+        //Modification candidat
+        if (prop==='candidat') {
+            target.candidatData = dataCandidats.find(value);
+            if (target.candidatData) {
+                target[prop]=value;
+                updateTitle();
+                updateMaps();
+            }
+        }
+        //Changement département (0 = France entière)
+        else if (prop==='departement'){
+            target[prop]=value;
+            zoomToDept(value);
+        }
+        else if (prop==='palette'){
+            target[prop]=value;
+        }
+        return true;
+    }
+});
 
 
 
 
-
-
-/************************************* FONCTIONS ****************************************/
+/************************************* DONNEES ****************************************/
 /**
  * Mapper pour les fichiers de résultats par communes au format csv
  * @param row
  * @returns {*}
  */
-const dataMapperCom = (row) => {
+function dataMapperCom (row) {
     for (const [key, value] of Object.entries(row)) {
         row[key] = (['dep','insee','nom'].includes(key)) ? row[key] : parseFloat(row[key]);
     }
@@ -40,7 +75,7 @@ const dataMapperCom = (row) => {
  * @param row
  * @returns {*}
  */
-const dataMapperDep = (row) => {
+function dataMapperDep (row) {
     for (const [key, value] of Object.entries(row)) {
         if (key.substring(0, 2)==='nb' || key==='tncc' || key==='reg_insee') row[key]=parseInt(row[key]);
         else if (key.substring(0, 4)==='voix' || key==='participation') row[key]=parseFloat(row[key]);
@@ -53,7 +88,7 @@ const dataMapperDep = (row) => {
  * @param row
  * @returns {*}
  */
-const dataMapperCand = (row) => {
+function dataMapperCand (row) {
     for (const [key, value] of Object.entries(row)) {
         row[key] = (['id', 'dep_min', 'dep_max', 'dep_moy','dep_med', 'com_min', 'com_max', 'com_moy','com_med','fr_moy'].includes(key)) ? parseFloat(row[key]) : row[key];
     }
@@ -61,13 +96,72 @@ const dataMapperCand = (row) => {
 }
 
 
+
+const dataCandidats = new DataCollection('candidats')
+    .load('./../assets/data/candidats-test.csv',{ primary: 'id',  delimiter: ';', mapper: dataMapperCand });
+
+const dataDepartements = new DataCollection('resParDept')
+    .load('./../assets/data/departements-test.csv',{ primary: 'insee', delimiter: ';', mapper: dataMapperDep });
+
+const dataPrefectures = new DataCollection('prefectures')
+    .load('./../assets/geodata/prefectures.csv',{   primary:'COM', mapper: row => row });
+
+
+//************************************ FONCTIONS ******************************************************
+
+/**
+ * Met le titre à jour
+ */
+function updateTitle () {
+
+    let t,n;
+    switch (global.candidat) {
+        case 13:
+            t = 'Cartographie de l\'';
+            n = 'abstention';
+            break;
+        case 14:
+            t = 'Cartographie du ';
+            n = 'vote blanc';
+            break;
+        default:
+            t = 'Cartographie du vote ';
+            n = global.candidatData.nom;
+    }
+    appTitle.text('titre',t)
+        .text('candidat',n,[`color:${global.candidatData.couleur}`,'font-weight:bold'])
+        .render();
+}
+
+
+/**
+ * Renvoie le jeu de couleurs pour l'affichage des cartes
+ * @param {Int} candidat        numero du candidat
+ * @returns {(string|*)[]|string[]}
+ */
+function paletteColors (candidatData) {
+    if (global.palette==='linear') return ['#fff',candidatData.couleur];
+    else if (global.palette==='diverging') return ['red','yallow','green'];
+}
+
+/**
+ * Met à jour les cartes chloroplethes avec les données courantes (global.candidat et global.palette)
+ */
+function updateMaps (){
+    //   console.log(paletteColors(global.candidat));
+    mapDepartements.fill ( global.candidatData.key, { colors: paletteColors(global.candidatData)});
+    for (const[key,myMap] of Object.entries(mapCommunes)) {
+        myMap.fill ( global.candidatData.key,{ colors: paletteColors(global.candidatData)});
+    }
+}
+
 /**
  * Zoome sur un departement
  * @param insee
  */
-const zoomToDept= (insee) => {
+function zoomToDept (insee) {
     appBox.hide();
-    appPanel.fold();
+
     //Zoom-in: zoom sur un département
     if (insee){
         mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
@@ -88,8 +182,8 @@ const zoomToDept= (insee) => {
                     mapCommunes[`_${insee}`]
                         .appendTo(mapContainer)
                         .render()
-                        .join(dataCommunes,'insee')
-                        .fill ( colorFactory( candidat.couleur,dataCommunes.col(candidat.key)),  d =>  d.properties.extra[candidat.key])
+                        .join(dataCommunes)
+                        .fill ( candidat.key, { colors: paletteColors(candidat)})
                         // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
                         .labels(dataPrefectures,'COM','NCCENR');
                     mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
@@ -97,7 +191,6 @@ const zoomToDept= (insee) => {
 
 
             })
-//AJOUTER PROMESSE dataCommunes.ready
 
 
            // mapContainer.zoomable(true);
@@ -132,44 +225,8 @@ const zoomToDept= (insee) => {
 }
 
 
-/**
- * Renvoie un interplateur données -> couleurs
- * @param baseColor
- * @param data
- * @returns {*}
- */
-const colorFactory = (baseColor, data )=> {
-   // console.log(data,Math.min(...data),Math.max(...data));
-    return d3.scaleLinear()
-        .range([baseColor,'#eee'])
-        .domain([d3.min(data),d3.max(data)])
-        .interpolate(d3.interpolateLab);
-}
 
 
-/**
- * Modifie le titre
- * @param {Object} candidat         Données du candidat
- */
-const changeTitle = (candidat) => {
-    let t,n;
-    switch (candidat.id) {
-        case 13:
-            t = 'Cartographie de l\'';
-            n = 'abstention';
-            break;
-        case 14:
-            t = 'Cartographie du ';
-            n = 'vote blanc';
-            break;
-        default:
-            t = 'Cartographie du vote ';
-            n = candidat.nom;
-    }
-    appTitle.text('titre',t)
-        .text('candidat',n,[`color:${candidat.couleur}`,'font-weight:bold'])
-        .render();
-}
 
 
 
@@ -187,7 +244,7 @@ const   appSelector =   new NavButtons('boutonsCandidats',{label:'', style:'squa
 
 const appBox =  new ContentBox('ContentBox');
 appBox.push=function(param){
-    const values=param.values.extra;
+    const values=param.values;
     console.log(dataCandidats.find(1));
     this.reset()
         .title(param.values.NCCENR)
@@ -214,63 +271,15 @@ console.log(values);
 
 }.bind(appBox)
 
-/************************************** DONNEES *******************************************/
-
-
-const global = new Proxy( { candidat:1, departement:0 } , {
-    get: (target, prop, receiver)=> {
-        return target[prop];
-    },
-    set: (target, prop, value, receiver) => {
-        //Modification candidat
-        if (prop==='candidat') {
-            const candidat = dataCandidats.find(value);
-            if (candidat) {
-                target.candidat=value;
-                changeTitle(candidat);
-                appPanel.fold({delay:500});
-
-               // console.warn(candidat);
-                mapDepartements
-                    .fill ( colorFactory( candidat.couleur,dataDepartements.col(candidat.key)), d =>  d.properties.extra[candidat.key]);
-                  //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
-                for (const[key,myMap] of Object.entries(mapCommunes)) {
-                    let dataMap=myMap.geodata.filter(d=>d.properties.extra)
-                                            .map(d=>d.properties.extra[candidat.key]);
-
-                    myMap.fill ( colorFactory( candidat.couleur,dataMap), d =>  d.properties.extra[candidat.key]);
-                }
-               // mapCommunes.forEach( m=> console.log(m));
-                return true;
-            }
-        }
-        //Changement département (0 = France entière)
-        else if (prop==='departement'){
-            zoomToDept(value);
-        }
-        return true;
-    }
-});
-
-
-const dataCandidats = new DataCollection('candidats')
-    .load('./../assets/data/candidats-test.csv',{ primary: 'id',  delimiter: ';', mapper: dataMapperCand });
-
-const dataDepartements = new DataCollection('resParDept')
-    .load('./../assets/data/departements-test.csv',{ primary: 'insee', delimiter: ';', mapper: dataMapperDep });
-
-const dataPrefectures = new DataCollection('prefectures')
-    .load('./../assets/geodata/prefectures.csv',{   primary:'COM', mapper: row => row });
-
 
 /**************************************** CARTES ***************************************/
 
-const   mapCommunes = { },
-        mapContainer =      new MapComposition('maCarte')
+const   mapContainer =      new MapComposition('maCarte')
                                 .appendTo('mainMap'),
         mapDepartements =   new MapLayer('departements', { autofit:true, primary:'DEP' })
                                 .appendTo(mapContainer)
                                 .load('./../assets/geomap/departements.topojson');
+const   mapCommunes = { };
 
 //Modifie l'opacité de la couche départements en fonction du niveau de zoom
 
@@ -344,7 +353,7 @@ Promise.all([ dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
 
     mapDepartements
         .render()
-        .join (dataDepartements,'insee')
+        .join (dataDepartements)
         .dispatch.on('click',(v)=> zoomToDept(v.id));
 
 
