@@ -1,6 +1,14 @@
-._Breadcrumb{
+$lightGray:#eee;
+$darkGray:#333;
 
-  height:2rem;
+@mixin itemBorder ($color) {
+  padding:.1rem .2rem;
+  border-radius:4px;
+  border: 1px solid $color;
+}
+
+
+._Breadcrumb{
 
   ul {
     white-space:nowrap;
@@ -25,18 +33,46 @@
 
   a, option[selected] {
     color:#333;
-    font-weight:bold;
   }
 
-  select{
+  option:disabled{
+    color: #ccc;
+    font-style: italic;
+  }
 
-    padding:.1rem .2rem;
-    border-radius:.2rem;
-    border: 1px solid #333;
+  select,input{
 
-    &.selected{
-      border: 1px solid #eee;
+    @include itemBorder($lightGray);
+    //appearance: none;
+
+    &:focus{
+      @include itemBorder($darkGray);
     }
+
+  }
+  span.autocomplete {
+    width:25rem;
+    position:relative;
+
+    input{
+      width:100%;
+      display:inline-block;
+    }
+    select{
+
+      position: absolute;
+      display:none;
+      margin-top:5px;
+      left:0;
+      width:100%;
+      overflow:visible;
+      z-index:50;
+
+      &.visible{
+        display:block;
+      }
+    }
+
 
   }
 

@@ -1,8 +1,19 @@
 $panelBorder: 1px solid #333;
+@mixin noHighlight{
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 
 ._Panel {
 
   position: absolute;
+  z-index:100;
 
   & > div {
     position:absolute;
@@ -21,6 +32,7 @@ $panelBorder: 1px solid #333;
       display: inline-block;
       transition: all 500ms ease-in-out;
       margin-left:20%;
+      @include noHighlight;
     }
 
     &:hover {

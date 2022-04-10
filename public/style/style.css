@@ -4,53 +4,6 @@ body {
 
 g._Layer path.area {
   stroke: #fff;
-}@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap");
-h1, h2, h3, h4, h5, h6 {
-  font-family: "Roboto", sans-serif;
-  margin-top: 0;
-  color: "#333";
-}
-
-p, input, textarea, select, a, li {
-  color: "#888";
-}
-
-div {
-  position: relative;
-}
-
-svg {
-  display: block;
-  width: 100%;
-}
-
-.no_highlights {
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 0;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  border-radius: 2px;
-  transition: background 0.5s ease-out;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #efefef;
-}
-
-img {
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-}
-
-button:focus {
-  outline: 0 !important;
 }#mainContainer {
   max-width: 800px;
   margin: auto;
@@ -90,98 +43,48 @@ button:focus {
 }
 #boutonsCandidats figure._13 img, #boutonsCandidats figure._14 img {
   max-width: 100px;
-}._Panel {
-  position: absolute;
-}
-._Panel > div {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-._Panel div.handle {
-  border: 1px solid #333;
-  border-right: none;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-}
-._Panel div.handle span {
-  display: inline-block;
-  transition: all 500ms ease-in-out;
-  margin-left: 20%;
-}
-._Panel div.handle:hover span {
-  color: #000;
-}
-._Panel div.content {
-  border-top: 1px solid #333;
-  border-bottom: 1px solid #333;
-  background: #fcfcfc;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
 }
 
-._Panel.right {
-  right: 0;
+._ContentBox section > p {
+  font-weight: bold;
+  text-align: right;
+}@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&family=Roboto+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:ital,wght@0,300;0,400;0,500;0,900;1,300;1,400&display=swap");
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Roboto", sans-serif;
+  margin-top: 0;
+  color: #333;
 }
-._Panel.right div.handle {
-  border-radius: 10px 0 0 10px;
+
+p, input, textarea, select, a, li, option {
+  color: #888;
 }
-._Panel.right.folded div.handle span {
-  transform: rotate(0deg);
-}
-._Panel.right.unfolded div.handle span {
-  transform: rotate(180deg);
-}._ContentBox {
-  position: absolute;
-  top: 500px;
-  left: 0;
-  min-width: 10rem;
-  max-width: 75%;
-  min-height: 5rem;
-  max-height: 25rem;
-  background: white;
-  border: 1px solid #aaa;
-  border-radius: 5px;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-  padding-bottom: 3rem;
-  display: none;
-}
-._ContentBox h2 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 2.5rem;
-  width: 100%;
-  border-radius: 5px 5px 0 0;
-  padding: 0.5rem 1rem;
-  text-transform: uppercase;
-  background: #efefef;
-  cursor: default;
-}
-._ContentBox h2.draggable {
-  cursor: grab;
-}
-._ContentBox h2.dragged {
-  cursor: move !important;
-}
-._ContentBox img.close {
-  transition: all 500ms ease-in-out;
-  position: absolute;
-  width: 1rem;
-  height: 1rem;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-  opacity: 0.8;
-}
-._ContentBox .inner {
+
+div {
   position: relative;
-  top: 2.5rem;
-  left: 0;
-  min-height: 6.5rem;
-  max-height: 16.5rem;
-  padding: 0.5rem 1rem;
-  overflow: auto;
+}
+
+svg {
+  display: block;
+  width: 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 2px;
+  transition: background 0.5s ease-out;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #efefef;
+}
+
+img {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+button:focus {
+  outline: 0 !important;
 }._Buttons {
   margin-top: 1rem;
   display: flex;
@@ -235,10 +138,67 @@ button:focus {
 }
 ._Buttons figure.selected figcaption {
   font-weight: bold;
-}._Breadcrumb {
-  height: 2rem;
+}._Panel {
+  position: absolute;
+  z-index: 100;
 }
-._Breadcrumb ul {
+._Panel > div {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+._Panel div.handle {
+  border: 1px solid #333;
+  border-right: none;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+}
+._Panel div.handle span {
+  display: inline-block;
+  transition: all 500ms ease-in-out;
+  margin-left: 20%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+._Panel div.handle:hover span {
+  color: #000;
+}
+._Panel div.content {
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  background: #fcfcfc;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+._Panel.right {
+  right: 0;
+}
+._Panel.right div.handle {
+  border-radius: 10px 0 0 10px;
+}
+._Panel.right.folded div.handle span {
+  transform: rotate(0deg);
+}
+._Panel.right.unfolded div.handle span {
+  transform: rotate(180deg);
+}.title, .subtitle, .intertitle {
+  display: block;
+  width: 100%;
+}
+
+.title.right, .subtitle.right {
+  text-align: right;
+}
+
+.title.center, .subtitle.center {
+  text-align: right;
+}._Breadcrumb ul {
   white-space: nowrap;
   list-style: none;
   align-items: flex-start;
@@ -258,26 +218,40 @@ button:focus {
 }
 ._Breadcrumb a, ._Breadcrumb option[selected] {
   color: #333;
-  font-weight: bold;
 }
-._Breadcrumb select {
+._Breadcrumb option:disabled {
+  color: #ccc;
+  font-style: italic;
+}
+._Breadcrumb select, ._Breadcrumb input {
   padding: 0.1rem 0.2rem;
-  border-radius: 0.2rem;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+._Breadcrumb select:focus, ._Breadcrumb input:focus {
+  padding: 0.1rem 0.2rem;
+  border-radius: 4px;
   border: 1px solid #333;
 }
-._Breadcrumb select.selected {
-  border: 1px solid #eee;
-}.title, .subtitle, .intertitle {
-  display: block;
+._Breadcrumb span.autocomplete {
+  width: 25rem;
+  position: relative;
+}
+._Breadcrumb span.autocomplete input {
   width: 100%;
+  display: inline-block;
 }
-
-.title.right, .subtitle.right {
-  text-align: right;
+._Breadcrumb span.autocomplete select {
+  position: absolute;
+  display: none;
+  margin-top: 5px;
+  left: 0;
+  width: 100%;
+  overflow: visible;
+  z-index: 50;
 }
-
-.title.center, .subtitle.center {
-  text-align: right;
+._Breadcrumb span.autocomplete select.visible {
+  display: block;
 }@keyframes blink {
   0% {
     stroke-width: 1;
@@ -323,4 +297,94 @@ button:focus {
 }
 ._Layer g.labels text.label.invisible {
   opacity: 0;
+}._ContentBox {
+  position: absolute;
+  top: 500px;
+  left: 0;
+  min-width: 20rem;
+  max-width: 90%;
+  min-height: 5rem;
+  max-height: 25rem;
+  background: white;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+  padding-bottom: 3rem;
+  display: none;
+}
+._ContentBox h2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  padding: 0.5rem 1rem;
+  text-transform: uppercase;
+  background: #efefef;
+  cursor: default;
+}
+._ContentBox h2.draggable {
+  cursor: grab;
+}
+._ContentBox h2.dragged {
+  cursor: move !important;
+}
+._ContentBox img.close {
+  transition: all 500ms ease-in-out;
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  opacity: 0.8;
+}
+._ContentBox .inner {
+  position: relative;
+  top: 2.5rem;
+  left: 0;
+  min-height: 6.5rem;
+  max-height: 16.5rem;
+  padding: 0.5rem 1rem;
+  overflow: auto;
+}
+._ContentBox .inner::-webkit-scrollbar {
+  width: 6px;
+}
+._ContentBox .inner::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  transition: background 0.5s ease-out;
+  background: #ccc;
+}
+._ContentBox .inner::-webkit-scrollbar-track {
+  background: #eee;
+}._Table {
+  width: 100%;
+  border-top: thin solid black;
+}
+._Table td, ._Table th {
+  text-align: left;
+}
+._Table td.right, ._Table th.right {
+  text-align: right;
+}
+._Table td.center, ._Table th.center {
+  text-align: center;
+}
+._Table td > span, ._Table th > span {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 2px;
+}
+._Table td {
+  padding: 0.1rem 0.2rem !important;
+}
+._Table th {
+  border-bottom: 1px solid #333 !important;
+  padding: 0.3rem 0.2rem !important;
+}
+._Table tr:last-child td {
+  border-bottom: none !important;
 }

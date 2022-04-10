@@ -1,11 +1,27 @@
+
+@mixin scrollbar{
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    transition: background 0.5s ease-out;
+    background:#ccc;
+  }
+  &::-webkit-scrollbar-track {
+    background: #eee;
+  }
+}
+
+
 $borderRadius:5px;
 
 ._ContentBox {
   position: absolute;
   top: 500px;
   left: 0;
-  min-width: 10rem;
-  max-width: 75%;
+  min-width: 20rem;
+  max-width: 90%;
   min-height: 5rem;
   max-height: 25rem;
   background: white;
@@ -58,6 +74,7 @@ $borderRadius:5px;
     max-height: 16.5rem;
     padding: .5rem 1rem;
     overflow: auto;
+    @include scrollbar;
 
   }
 }

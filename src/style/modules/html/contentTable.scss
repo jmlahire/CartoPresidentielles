@@ -1,4 +1,37 @@
 ._Table{
   width:100%;
+  border-top:thin solid black;
+
+  td,th{
+    text-align:left;
+
+    &.right {
+      text-align:right;
+    }
+    &.center {
+      text-align:center;
+    }
+
+    &>span {
+      display:inline-block;
+      width:1rem;
+      height:1rem;
+      border-radius:2px;
+    }
+  }
+
+
+    td{
+      padding:.1rem .2rem!important;
+    }
+    th {
+      border-bottom: 1px solid #333!important;
+      padding:.3rem .2rem!important;
+    }
+    tr:last-child td {
+      border-bottom:none!important;
+    }
+
+
 
 }

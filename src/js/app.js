@@ -11,6 +11,7 @@ import {Panel} from "./modules/html/panel.js";
 import {MapComposition} from './modules/svg/map.composition';
 import {MapLayer} from './modules/svg/map.layer';
 
+
 import * as d3Array from 'd3-array'
 import * as d3Scale from 'd3-scale'
 import * as d3Interpolate from 'd3-interpolate'
@@ -70,27 +71,31 @@ const zoomToDept= (insee) => {
     //Zoom-in: zoom sur un département
     if (insee){
         mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
+        appNavigator.getLevel(1).select(insee);
         const candidat = dataCandidats.find(global.candidat);
       //  console.log(appNavigator.level(1));
         //Cas A : Carte et données à charger
         if (!mapCommunes[`_${insee}`]) {
 
-            const dataCommunes = new DataCollection(`Résultats_${insee}`)
-                                        .load(`../assets/data/${insee}.csv`,
-                                            {   primary:'insee',
-                                                mapper: dataMapperCom });
+            mapCommunes[`_${insee}`] =  new MapLayer(`_${insee}`,{ primary:'COM', secondary:'NCC', className:'communes' })
+                                                .load(`../assets/geomap/${insee}.topojson`);
+            const dataCommunes =        new DataCollection(`Résultats_${insee}`)
+                                                .load(`../assets/data/${insee}.csv`,{   primary:'insee', delimiter:';', mapper: dataMapperCom });
             dataCommunes.ready.then((v)=>{
-                mapCommunes[`_${insee}`] = new MapLayer(`_${insee}`,{ primary:'COM', secondary:'NCC', className:'communes' })
-                    .appendTo(mapContainer)
-                    .load(`../assets/geomap/${insee}.topojson`);
-                mapCommunes[`_${insee}`].exportProperties();
+                mapCommunes[`_${insee}`].ready.then((geodata)=>{
+                    appNavigator.getLevel(2).data(dataCommunes.dataset, {placeHolder: 'Commune', valueKey:'insee', labelKey:'nom'});
+                    appNavigator.showLevels(3);
+                    mapCommunes[`_${insee}`]
+                        .appendTo(mapContainer)
+                        .render()
+                        .join(dataCommunes,'insee')
+                        .fill ( colorFactory( candidat.couleur,dataCommunes.col(candidat.key)),  d =>  d.properties.extra[candidat.key])
+                        // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
+                        .labels(dataPrefectures,'COM','NCCENR');
+                    mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
+                })
 
-                mapCommunes[`_${insee}`].render()
-                    .join(dataCommunes,'insee')
-                    .fill ( colorFactory2( candidat.couleur,dataCommunes.col(candidat.key)),  d =>  d.properties.extra[candidat.key])
-                    // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
-                    .labels(dataPrefectures,'COM','NCCENR');
-                mapCommunes[`_${insee}`].dispatch.on('click',appBox.push );
+
             })
 //AJOUTER PROMESSE dataCommunes.ready
 
@@ -118,6 +123,7 @@ const zoomToDept= (insee) => {
     }
     //Zoom-out: retour carte de France
     else {
+        appNavigator.showLevels(2);
         mapDepartements.deselectAll();
         mapContainer.fadeOutLayers(`.communes`);
         mapContainer.zoomOut();
@@ -129,18 +135,10 @@ const zoomToDept= (insee) => {
 /**
  * Renvoie un interplateur données -> couleurs
  * @param baseColor
- * @param range
+ * @param data
  * @returns {*}
  */
-const colorFactory = (baseColor, domain=[0,100] )=> {
-    return d3.scaleLinear()
-        .range([baseColor,'#eee'])
-        .domain(domain)
-        .interpolate(d3.interpolateLab);
-}
-
-
-const colorFactory2 = (baseColor, data )=> {
+const colorFactory = (baseColor, data )=> {
    // console.log(data,Math.min(...data),Math.max(...data));
     return d3.scaleLinear()
         .range([baseColor,'#eee'])
@@ -189,12 +187,31 @@ const   appSelector =   new NavButtons('boutonsCandidats',{label:'', style:'squa
 
 const appBox =  new ContentBox('ContentBox');
 appBox.push=function(param){
-    //console.log(this,param);
+    const values=param.values.extra;
+    console.log(dataCandidats.find(1));
     this.reset()
         .title(param.values.NCCENR)
-        // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
-        .position(param.event)
-        .show();
+
+        .text('Participation: '+(100-values.nb_voix13)+'%',{align:'right'});
+
+    const table=this.table()
+        .tr([ { v:'Candidat',colspan:2},{v:'Suffrages', align:'right'},{v:'Résultat',align:'right'}],{tag:'th'});
+    const order=[];
+    for (let i=1;i<=12;i++){
+        order.push({i:i,v:values[`nb_voix${i}`]});
+    }
+    order.sort((a,b)=>a.v>b.v);
+    order.forEach(d=> {
+        let candidat=dataCandidats.find(d.i);
+        table.tr([ {v:candidat.couleur, f:'color'},{ v: candidat.nom},{ v: values[`nb_voix${d.i}`], f:'int'}, { v: values[`voix_${d.i}`], f:'percent'} ] );
+    });
+    this.table()
+        .tr([ { v: 'Inscrits'},{ v: values.nb_inscrits, f:'int'} ] )
+        .tr([ { v: 'Votants'},{ v: values.nb_votants, f:'int'} ] )
+        .tr([ { v: 'Suffrages exprimés'},{ v: values.nb_exprimes, f:'int'} ] );
+    this       .position(param.event).show();
+console.log(values);
+
 }.bind(appBox)
 
 /************************************** DONNEES *******************************************/
@@ -212,12 +229,16 @@ const global = new Proxy( { candidat:1, departement:0 } , {
                 target.candidat=value;
                 changeTitle(candidat);
                 appPanel.fold({delay:500});
+
                // console.warn(candidat);
                 mapDepartements
-                    .fill ( colorFactory2( candidat.couleur,dataDepartements.col(candidat.key)), d =>  d.properties.extra[candidat.key]);
+                    .fill ( colorFactory( candidat.couleur,dataDepartements.col(candidat.key)), d =>  d.properties.extra[candidat.key]);
                   //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
                 for (const[key,myMap] of Object.entries(mapCommunes)) {
-                    myMap.fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
+                    let dataMap=myMap.geodata.filter(d=>d.properties.extra)
+                                            .map(d=>d.properties.extra[candidat.key]);
+
+                    myMap.fill ( colorFactory( candidat.couleur,dataMap), d =>  d.properties.extra[candidat.key]);
                 }
                // mapCommunes.forEach( m=> console.log(m));
                 return true;
@@ -283,8 +304,13 @@ Promise.all([ dataDepartements.ready, dataCandidats.ready]).then( ()=>  {
     appTitle.appendTo('mainHeader');
     appBox.appendTo('mainMap');
 
-    appNavigator.level(0,'France');
-    appNavigator.level(1,dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
+    appNavigator.setLevel(0,'label')
+                .setLevel(1,'select')
+        .setLevel(2,'autocomplete');
+    appNavigator.getLevel(0).data('France');
+    appNavigator.getLevel(1).data(dataDepartements, { placeHolder: 'Département', nestKey: 'reg_nom', valueKey:'insee', labelKey:'nom'});
+    appNavigator.getLevel(2).hide();
+  //  appNavigator.getLevel(2).data(dataDepartements.dataset, {placeHolder: 'Commune', valueKey:'insee', labelKey:'nom'});
     appNavigator.appendTo('mainHeader');
     appNavigator.render();
     appNavigator.dispatch.on('change',(d)=> {

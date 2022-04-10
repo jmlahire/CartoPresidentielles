@@ -1699,7 +1699,7 @@
     svg: svg
   });
 
-  const d3$a = Object.assign({}, d3Array, d3Fetch, d3Dsv);
+  const d3$b = Object.assign({}, d3Array, d3Fetch, d3Dsv);
 
   class DataCollection {
     static type = 'DataCollection';
@@ -1773,13 +1773,13 @@
       this.ready = new Promise((resolve, reject) => {
         options = { ...{
             delimiter: ',',
-            mapper: d3$a.autoType,
+            mapper: d3$b.autoType,
             primary: undefined
           },
           ...options
         };
-        d3$a.text(`${file}`).then(dataset => {
-          dataset = d3$a.dsvFormat(options.delimiter).parse(dataset);
+        d3$b.text(`${file}`).then(dataset => {
+          dataset = d3$b.dsvFormat(options.delimiter).parse(dataset);
           if (options.mapper) dataset = dataset.map(options.mapper);
           if (options.primary) this.primary = options.primary;
           this.push(dataset);
@@ -1881,7 +1881,7 @@
     toGroups(keys) {
       if (typeof keys === 'string') keys = [keys];
       let fns = keys.map(k => d => d[k]),
-          nested = d3$a.groups(this.dataset, ...fns); //A vérifier que ça marche avec plusieurs clés...
+          nested = d3$b.groups(this.dataset, ...fns); //A vérifier que ça marche avec plusieurs clés...
 
       return nested;
     }
@@ -1981,7 +1981,7 @@
 
     extent(key) {
       if (typeof key == 'string') {
-        return d3$a.extent(this.col(key));
+        return d3$b.extent(this.col(key));
       } else if (Array.isArray(key)) {
         return [this.min(key[0]), this.max(key[1])];
       }
@@ -1994,7 +1994,7 @@
 
 
     min(key) {
-      return d3$a.min(this.col(key));
+      return d3$b.min(this.col(key));
     }
     /**
      * Renvoie la valeur maximale d'une colonne
@@ -2004,7 +2004,7 @@
 
 
     max(key) {
-      return d3$a.max(this.col(key));
+      return d3$b.max(this.col(key));
     }
     /**
      * Renvoie un tableau contenant les valeurs uniques d'une colonne
@@ -2034,7 +2034,7 @@
 
 
     sort(key, type = 'descending', inPlace = true) {
-      let dataset = this.dataset.sort((a, b) => d3$a[type](a[key], b[key]));
+      let dataset = this.dataset.sort((a, b) => d3$b[type](a[key], b[key]));
 
       if (inPlace) {
         this.dataset = dataset;
@@ -2957,14 +2957,14 @@
     }
   }
 
-  var root$1 = [null];
+  var root$2 = [null];
   function Selection$1(groups, parents) {
     this._groups = groups;
     this._parents = parents;
   }
 
   function selection() {
-    return new Selection$1([[document.documentElement]], root$1);
+    return new Selection$1([[document.documentElement]], root$2);
   }
 
   function selection_selection() {
@@ -3011,7 +3011,7 @@
   };
 
   function select (selector) {
-    return typeof selector === "string" ? new Selection$1([[document.querySelector(selector)]], [document.documentElement]) : new Selection$1([[selector]], root$1);
+    return typeof selector === "string" ? new Selection$1([[document.querySelector(selector)]], [document.documentElement]) : new Selection$1([[selector]], root$2);
   }
 
   function create$1 (name) {
@@ -3090,7 +3090,7 @@
   }
 
   function selectAll (selector) {
-    return typeof selector === "string" ? new Selection$1([document.querySelectorAll(selector)], [document.documentElement]) : new Selection$1([array$1(selector)], root$1);
+    return typeof selector === "string" ? new Selection$1([document.querySelectorAll(selector)], [document.documentElement]) : new Selection$1([array$1(selector)], root$2);
   }
 
   var d3Selection = /*#__PURE__*/Object.freeze({
@@ -3200,7 +3200,7 @@
 
   new Queue();
 
-  const d3$9 = Object.assign({}, d3Selection);
+  const d3$a = Object.assign({}, d3Selection);
 
   class Component extends Queue {
     static type = '_Component';
@@ -3264,10 +3264,10 @@
           this.parentComponent = parent;
           this.parentContainer = parent.container || parent.innerContainer;
         } //Selection d3
-        else if (parent instanceof d3$9.selection) this.parentContainer = parent; //Id
-        else if (typeof parent === 'string' && parent.match(/[#\.]/g)) this.parentContainer = d3$9.select(`${parent}`); //Selecteur
-        else if (typeof parent === 'string') this.parentContainer = d3$9.select(`#${parent}`); //Sinon -> body
-        else this.parentContainer = d3$9.select('body'); //Insertion dans le DOM
+        else if (parent instanceof d3$a.selection) this.parentContainer = parent; //Id
+        else if (typeof parent === 'string' && parent.match(/[#\.]/g)) this.parentContainer = d3$a.select(`${parent}`); //Selecteur
+        else if (typeof parent === 'string') this.parentContainer = d3$a.select(`#${parent}`); //Sinon -> body
+        else this.parentContainer = d3$a.select('body'); //Insertion dans le DOM
 
 
         try {
@@ -3358,7 +3358,7 @@
 
   }
 
-  const d3$8 = Object.assign({}, d3Selection);
+  const d3$9 = Object.assign({}, d3Selection);
   /**
    * CLASSE ABSTRAITE SERVANT DE BASE A LA TITRAILLE
    */
@@ -3383,7 +3383,7 @@
       };
       this.spans = new Map();
       options.spans.forEach(s => this.spans.set(s, ['', []]));
-      this.container = d3$8.create(options.tag).attr('id', id).classed(options.class, true);
+      this.container = d3$9.create(options.tag).attr('id', id).classed(options.class, true);
     }
     /**
      * Définit le contenu d'un des spans du titre
@@ -3411,7 +3411,7 @@
 
     render() {
       this.spans.forEach(value => {
-        const spanContainer = d3$8.create('div'),
+        const spanContainer = d3$9.create('div'),
               spanContent = spanContainer.append('span')[value.format](value.content);
 
         if (value.style.length) {
@@ -3577,43 +3577,447 @@
     dispatch: dispatch
   });
 
-  const d3$7 = Object.assign({}, d3Selection, d3Dispatch);
+  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
   /**
-   * Factory
+   * lodash (Custom Build) <https://lodash.com/>
+   * Build: `lodash modularize exports="npm" -o ./`
+   * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+   * Released under MIT license <https://lodash.com/license>
+   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+   */
+  /** Used as references for various `Number` constants. */
+
+  var INFINITY = 1 / 0;
+  /** `Object#toString` result references. */
+
+  var symbolTag = '[object Symbol]';
+  /** Used to match Latin Unicode letters (excluding mathematical operators). */
+
+  var reLatin = /[\xc0-\xd6\xd8-\xf6\xf8-\xff\u0100-\u017f]/g;
+  /** Used to compose unicode character classes. */
+
+  var rsComboMarksRange = '\\u0300-\\u036f\\ufe20-\\ufe23',
+      rsComboSymbolsRange = '\\u20d0-\\u20f0';
+  /** Used to compose unicode capture groups. */
+
+  var rsCombo = '[' + rsComboMarksRange + rsComboSymbolsRange + ']';
+  /**
+   * Used to match [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks) and
+   * [combining diacritical marks for symbols](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks_for_Symbols).
    */
 
-  class itemFactory {
-    /**
-     *
-     * @param {Number} index
-     * @param {String|DataCollection} data
-     * @param {Object} [options]
-     * @returns {*}
-     */
-    constructor(index, data, options) {
-      if (typeof data === 'string') return new labelItem(index, data);else if (data instanceof DataCollection) return new selectItem(index, data, options);else console.warn('Impossible de créer l\'item');
+  var reComboMark = RegExp(rsCombo, 'g');
+  /** Used to map Latin Unicode letters to basic Latin letters. */
+
+  var deburredLetters = {
+    // Latin-1 Supplement block.
+    '\xc0': 'A',
+    '\xc1': 'A',
+    '\xc2': 'A',
+    '\xc3': 'A',
+    '\xc4': 'A',
+    '\xc5': 'A',
+    '\xe0': 'a',
+    '\xe1': 'a',
+    '\xe2': 'a',
+    '\xe3': 'a',
+    '\xe4': 'a',
+    '\xe5': 'a',
+    '\xc7': 'C',
+    '\xe7': 'c',
+    '\xd0': 'D',
+    '\xf0': 'd',
+    '\xc8': 'E',
+    '\xc9': 'E',
+    '\xca': 'E',
+    '\xcb': 'E',
+    '\xe8': 'e',
+    '\xe9': 'e',
+    '\xea': 'e',
+    '\xeb': 'e',
+    '\xcc': 'I',
+    '\xcd': 'I',
+    '\xce': 'I',
+    '\xcf': 'I',
+    '\xec': 'i',
+    '\xed': 'i',
+    '\xee': 'i',
+    '\xef': 'i',
+    '\xd1': 'N',
+    '\xf1': 'n',
+    '\xd2': 'O',
+    '\xd3': 'O',
+    '\xd4': 'O',
+    '\xd5': 'O',
+    '\xd6': 'O',
+    '\xd8': 'O',
+    '\xf2': 'o',
+    '\xf3': 'o',
+    '\xf4': 'o',
+    '\xf5': 'o',
+    '\xf6': 'o',
+    '\xf8': 'o',
+    '\xd9': 'U',
+    '\xda': 'U',
+    '\xdb': 'U',
+    '\xdc': 'U',
+    '\xf9': 'u',
+    '\xfa': 'u',
+    '\xfb': 'u',
+    '\xfc': 'u',
+    '\xdd': 'Y',
+    '\xfd': 'y',
+    '\xff': 'y',
+    '\xc6': 'Ae',
+    '\xe6': 'ae',
+    '\xde': 'Th',
+    '\xfe': 'th',
+    '\xdf': 'ss',
+    // Latin Extended-A block.
+    '\u0100': 'A',
+    '\u0102': 'A',
+    '\u0104': 'A',
+    '\u0101': 'a',
+    '\u0103': 'a',
+    '\u0105': 'a',
+    '\u0106': 'C',
+    '\u0108': 'C',
+    '\u010a': 'C',
+    '\u010c': 'C',
+    '\u0107': 'c',
+    '\u0109': 'c',
+    '\u010b': 'c',
+    '\u010d': 'c',
+    '\u010e': 'D',
+    '\u0110': 'D',
+    '\u010f': 'd',
+    '\u0111': 'd',
+    '\u0112': 'E',
+    '\u0114': 'E',
+    '\u0116': 'E',
+    '\u0118': 'E',
+    '\u011a': 'E',
+    '\u0113': 'e',
+    '\u0115': 'e',
+    '\u0117': 'e',
+    '\u0119': 'e',
+    '\u011b': 'e',
+    '\u011c': 'G',
+    '\u011e': 'G',
+    '\u0120': 'G',
+    '\u0122': 'G',
+    '\u011d': 'g',
+    '\u011f': 'g',
+    '\u0121': 'g',
+    '\u0123': 'g',
+    '\u0124': 'H',
+    '\u0126': 'H',
+    '\u0125': 'h',
+    '\u0127': 'h',
+    '\u0128': 'I',
+    '\u012a': 'I',
+    '\u012c': 'I',
+    '\u012e': 'I',
+    '\u0130': 'I',
+    '\u0129': 'i',
+    '\u012b': 'i',
+    '\u012d': 'i',
+    '\u012f': 'i',
+    '\u0131': 'i',
+    '\u0134': 'J',
+    '\u0135': 'j',
+    '\u0136': 'K',
+    '\u0137': 'k',
+    '\u0138': 'k',
+    '\u0139': 'L',
+    '\u013b': 'L',
+    '\u013d': 'L',
+    '\u013f': 'L',
+    '\u0141': 'L',
+    '\u013a': 'l',
+    '\u013c': 'l',
+    '\u013e': 'l',
+    '\u0140': 'l',
+    '\u0142': 'l',
+    '\u0143': 'N',
+    '\u0145': 'N',
+    '\u0147': 'N',
+    '\u014a': 'N',
+    '\u0144': 'n',
+    '\u0146': 'n',
+    '\u0148': 'n',
+    '\u014b': 'n',
+    '\u014c': 'O',
+    '\u014e': 'O',
+    '\u0150': 'O',
+    '\u014d': 'o',
+    '\u014f': 'o',
+    '\u0151': 'o',
+    '\u0154': 'R',
+    '\u0156': 'R',
+    '\u0158': 'R',
+    '\u0155': 'r',
+    '\u0157': 'r',
+    '\u0159': 'r',
+    '\u015a': 'S',
+    '\u015c': 'S',
+    '\u015e': 'S',
+    '\u0160': 'S',
+    '\u015b': 's',
+    '\u015d': 's',
+    '\u015f': 's',
+    '\u0161': 's',
+    '\u0162': 'T',
+    '\u0164': 'T',
+    '\u0166': 'T',
+    '\u0163': 't',
+    '\u0165': 't',
+    '\u0167': 't',
+    '\u0168': 'U',
+    '\u016a': 'U',
+    '\u016c': 'U',
+    '\u016e': 'U',
+    '\u0170': 'U',
+    '\u0172': 'U',
+    '\u0169': 'u',
+    '\u016b': 'u',
+    '\u016d': 'u',
+    '\u016f': 'u',
+    '\u0171': 'u',
+    '\u0173': 'u',
+    '\u0174': 'W',
+    '\u0175': 'w',
+    '\u0176': 'Y',
+    '\u0177': 'y',
+    '\u0178': 'Y',
+    '\u0179': 'Z',
+    '\u017b': 'Z',
+    '\u017d': 'Z',
+    '\u017a': 'z',
+    '\u017c': 'z',
+    '\u017e': 'z',
+    '\u0132': 'IJ',
+    '\u0133': 'ij',
+    '\u0152': 'Oe',
+    '\u0153': 'oe',
+    '\u0149': "'n",
+    '\u017f': 'ss'
+  };
+  /** Detect free variable `global` from Node.js. */
+
+  var freeGlobal = typeof commonjsGlobal == 'object' && commonjsGlobal && commonjsGlobal.Object === Object && commonjsGlobal;
+  /** Detect free variable `self`. */
+
+  var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+  /** Used as a reference to the global object. */
+
+  var root$1 = freeGlobal || freeSelf || Function('return this')();
+  /**
+   * The base implementation of `_.propertyOf` without support for deep paths.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @returns {Function} Returns the new accessor function.
+   */
+
+  function basePropertyOf(object) {
+    return function (key) {
+      return object == null ? undefined : object[key];
+    };
+  }
+  /**
+   * Used by `_.deburr` to convert Latin-1 Supplement and Latin Extended-A
+   * letters to basic Latin letters.
+   *
+   * @private
+   * @param {string} letter The matched letter to deburr.
+   * @returns {string} Returns the deburred letter.
+   */
+
+
+  var deburrLetter = basePropertyOf(deburredLetters);
+  /** Used for built-in method references. */
+
+  var objectProto = Object.prototype;
+  /**
+   * Used to resolve the
+   * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+   * of values.
+   */
+
+  var objectToString = objectProto.toString;
+  /** Built-in value references. */
+
+  var Symbol$1 = root$1.Symbol;
+  /** Used to convert symbols to primitives and strings. */
+
+  var symbolProto = Symbol$1 ? Symbol$1.prototype : undefined,
+      symbolToString = symbolProto ? symbolProto.toString : undefined;
+  /**
+   * The base implementation of `_.toString` which doesn't convert nullish
+   * values to empty strings.
+   *
+   * @private
+   * @param {*} value The value to process.
+   * @returns {string} Returns the string.
+   */
+
+  function baseToString(value) {
+    // Exit early for strings to avoid a performance hit in some environments.
+    if (typeof value == 'string') {
+      return value;
     }
 
+    if (isSymbol(value)) {
+      return symbolToString ? symbolToString.call(value) : '';
+    }
+
+    var result = value + '';
+    return result == '0' && 1 / value == -INFINITY ? '-0' : result;
   }
+  /**
+   * Checks if `value` is object-like. A value is object-like if it's not `null`
+   * and has a `typeof` result of "object".
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+   * @example
+   *
+   * _.isObjectLike({});
+   * // => true
+   *
+   * _.isObjectLike([1, 2, 3]);
+   * // => true
+   *
+   * _.isObjectLike(_.noop);
+   * // => false
+   *
+   * _.isObjectLike(null);
+   * // => false
+   */
+
+
+  function isObjectLike(value) {
+    return !!value && typeof value == 'object';
+  }
+  /**
+   * Checks if `value` is classified as a `Symbol` primitive or object.
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Lang
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+   * @example
+   *
+   * _.isSymbol(Symbol.iterator);
+   * // => true
+   *
+   * _.isSymbol('abc');
+   * // => false
+   */
+
+
+  function isSymbol(value) {
+    return typeof value == 'symbol' || isObjectLike(value) && objectToString.call(value) == symbolTag;
+  }
+  /**
+   * Converts `value` to a string. An empty string is returned for `null`
+   * and `undefined` values. The sign of `-0` is preserved.
+   *
+   * @static
+   * @memberOf _
+   * @since 4.0.0
+   * @category Lang
+   * @param {*} value The value to process.
+   * @returns {string} Returns the string.
+   * @example
+   *
+   * _.toString(null);
+   * // => ''
+   *
+   * _.toString(-0);
+   * // => '-0'
+   *
+   * _.toString([1, 2, 3]);
+   * // => '1,2,3'
+   */
+
+
+  function toString(value) {
+    return value == null ? '' : baseToString(value);
+  }
+  /**
+   * Deburrs `string` by converting
+   * [Latin-1 Supplement](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+   * and [Latin Extended-A](https://en.wikipedia.org/wiki/Latin_Extended-A)
+   * letters to basic Latin letters and removing
+   * [combining diacritical marks](https://en.wikipedia.org/wiki/Combining_Diacritical_Marks).
+   *
+   * @static
+   * @memberOf _
+   * @since 3.0.0
+   * @category String
+   * @param {string} [string=''] The string to deburr.
+   * @returns {string} Returns the deburred string.
+   * @example
+   *
+   * _.deburr('déjà vu');
+   * // => 'deja vu'
+   */
+
+
+  function deburr(string) {
+    string = toString(string);
+    return string && string.replace(reLatin, deburrLetter).replace(reComboMark, '');
+  }
+
+  var lodash_deburr = deburr;
+
+  const d3$8 = Object.assign({}, d3Selection, d3Dispatch);
 
   class abstractItem {
     constructor(index) {
       this.index = index;
-      this.dispatch = d3$7.dispatch('change');
+      this.dispatch = d3$8.dispatch('change');
+      this.container = d3$8.create('li');
+    }
+
+    render() {
+      this.container.selectAll('*').remove();
+      this.container.append(() => this.content.node());
+      return this;
+    }
+
+    hide() {
+      this.container.style('display', 'none');
+      return this;
+    }
+
+    show() {
+      this.container.style('display', 'list-item');
+      return this;
     }
 
   }
 
   class labelItem extends abstractItem {
-    constructor(index, label) {
+    constructor(index) {
       super(index);
-      this.content = label;
+      this.content = d3$8.create('a');
     }
 
-    render() {
-      this.container.append('a').text(this.content).on('click', () => this.dispatch.call('change', this, {
+    data(label) {
+      this.content.text(label).on('click', () => this.dispatch.call('change', this, {
         index: this.index,
-        value: this.content
+        value: label
       }));
       return this;
     }
@@ -3622,8 +4026,15 @@
 
   class selectItem extends abstractItem {
     /**
-     *
+     * CONSTRUCTEUR
      * @param {Number}          index
+     */
+    constructor(index) {
+      super(index);
+      this.content = d3$8.create('select');
+    }
+    /**
+     *
      * @param {DataCollection}  data
      * @param {Object}          options
      * @param {String}          options.valueKey
@@ -3631,45 +4042,38 @@
      * @param {String}          [options.nestKey]
      * @param {String}          [options.labelKey]
      */
-    constructor(index, data, options = {}) {
-      super(index);
-      this.options = options;
-      this.content = data instanceof DataCollection ? this._createSelect(data, options) : null;
-    }
 
-    _createSelect(data, options) {
-      const selector = d3$7.create('select');
-      if (options.placeHolder) selector.append('option').attr('value', '').property('disabled', true).property('selected', true).property('hidden', true).text(options.placeHolder);
+
+    data(data, options = {}) {
+      this.options = options;
+      if (options.placeHolder) this.content.append('option').attr('value', '').property('disabled', true).property('selected', true).property('hidden', true).text(options.placeHolder);
 
       if (options.nestKey) {
         data = data.toGroups(options.nestKey);
-        selector.selectAll('optgroup').data(data, d => d[0]).enter().append('optgroup').attr('label', d => d[0].toUpperCase()).selectAll('option').data(d => d[1]).enter().append('option').attr('value', d => d[options.valueKey]).text(d => d[options.labelKey]);
+        this.content.selectAll('optgroup').data(data, d => d[0]).enter().append('optgroup').attr('label', d => d[0].toUpperCase()).selectAll('option').data(d => d[1]).enter().append('option').attr('value', d => d[options.valueKey]).text(d => d[options.labelKey]);
       }
 
-      return selector;
-    }
-
-    render() {
-      this.container.append(() => this.content.node()).on('change', e => //e.stopPropagation();
-      this.select(e.target.value));
+      this.content.on('change', e => {
+        this.select(e.target.value);
+        this.dispatch.call('change', this, {
+          index: this.index,
+          value: e.target.value
+        });
+      });
       return this;
     }
     /**
-     * Sélectionne une option
+     * Sélectionne une option (purement graphique, ne déclenche pas dispatch)
      * @param {String|Number} value         valeur de l'option à sélectionner
+     * @param
      * @returns {selectItem}
      */
 
 
     select(value) {
-      this.content.selectAll('option').filter(d => d).each((d, i, n) => {
-        const elt = d3$7.select(n[i]);
+      this.content.classed('selected', true).selectAll('option').filter(d => d).each((d, i, n) => {
+        const elt = d3$8.select(n[i]);
         if (d[this.options.valueKey] === value) elt.property('selected', true);else elt.attr('selected', null);
-      });
-      this.content.classed('selected', true);
-      this.dispatch.call('change', this, {
-        index: this.index,
-        value: value
       });
       return this;
     }
@@ -3686,6 +4090,79 @@
 
   }
 
+  class autocompleteItem extends abstractItem {
+    /**
+     *
+     * @param {Number}          index
+     */
+    constructor(index) {
+      super(index);
+      this.content = d3$8.create('span').classed('autocomplete', true);
+      this._input = this.content.append('input');
+      this._selection = this.content.append('select');
+    }
+    /**
+     *
+     * @param {Array}           data
+     * @param {Object}          options
+     * @param {String}          options.valueKey
+     * @param {String}          [options.placeHolder]
+     * @param {String}          [options.nestKey]
+     * @param {String}          [options.labelKey]
+     */
+
+
+    data(data, options) {
+      this._data = data.map(row => {
+        return {
+          value: row[options.valueKey],
+          label: row[options.labelKey],
+          deburr: this._normalize(row[options.labelKey])
+        };
+      });
+      if (options.placeHolder) this._input.attr('placeholder', options.placeHolder);
+
+      this._input.on('input', event => {
+        let text = this._normalize(event.target.value);
+
+        const results = text.length > 2 ? this._search(text) : this._search(text, true);
+
+        this._updateSelection(results);
+
+        if (results.length) {
+          this._selection.classed('visible', results.length).on('change', e => {
+            this.dispatch.call('change', this, {
+              index: this.index,
+              value: e.target.value
+            });
+          });
+        } else this._selection.classed('visible', false);
+      });
+    }
+
+    _normalize(text) {
+      return lodash_deburr(text).toLowerCase();
+    }
+
+    _search(text, exact = false) {
+      text = this._normalize(text);
+      return exact ? this._data.filter(row => row.deburr === text) : this._data.filter(row => row.deburr.search(text) >= 0);
+    }
+
+    _updateSelection(data) {
+      this._selection.selectAll('option').data(data, d => d.value).join(enter => enter.append('option').attr('value', d => d.value).text(d => d.label), update => update.attr('value', d => d.value).text(d => d.label), exit => exit.remove());
+      /*  if (this._options.placeHolder) this._selection.append('option')
+            .attr('value', '')
+            .property('disabled', true)
+            .property('selected', true)
+            .property('hidden', true)
+            .raise()
+            .text('Déroulez la liste');*/
+
+    }
+
+  }
+
   class NavBreadcrumb extends Component {
     static type = '_Breadcrumb';
     static defaultOptions = {
@@ -3698,11 +4175,10 @@
         ...options
       };
       this.levels = new Array();
-      this.dispatch = d3$7.dispatch('change');
-      this._outerContainer = d3$7.create('nav').attr('id', this.id).classed(NavBreadcrumb.type, true);
+      this.dispatch = d3$8.dispatch('change');
+      this._outerContainer = d3$8.create('nav').attr('id', this.id).classed(NavBreadcrumb.type, true);
       this._innerContainer = this._outerContainer.append('ul');
       this._index = 0;
-      this._active = 0;
     }
 
     get innerContainer() {
@@ -3713,20 +4189,27 @@
       return this._outerContainer;
     }
 
-    level(index, values, options = {}) {
-      if (arguments.length === 1) {
-        return this.levels[index];
-      } else {
-        this.levels[index] = new itemFactory(index, values, options);
-        return this;
-      }
+    setLevel(index, type) {
+      if (type === 'label') this.levels[index] = new labelItem(index);else if (type === 'select') this.levels[index] = new selectItem(index);else if (type === 'autocomplete') this.levels[index] = new autocompleteItem(index);
+      return this;
+    }
+
+    getLevel(index) {
+      return this.levels[index];
+    }
+
+    showLevels(limit = this.levels.length) {
+      this.innerContainer.selectAll('li').each((d, i, n) => {
+        d3$8.select(n[i]).style('display', i < limit ? 'list-item' : 'none');
+      });
+      return this;
     }
 
     render() {
       this.innerContainer.selectAll('*').remove();
       this.levels.forEach(lvl => {
-        lvl.container = this.innerContainer.append('li');
         lvl.render();
+        this.innerContainer.append(() => lvl.container.node());
         lvl.dispatch.on('change', event => this.dispatch.call('change', this, event));
       });
       return this;
@@ -3734,7 +4217,7 @@
 
   }
 
-  const d3$6 = Object.assign({}, d3Selection, d3Dispatch, d3Array);
+  const d3$7 = Object.assign({}, d3Selection, d3Dispatch, d3Array);
   /**
    * Renvoie une série de boutons correspondant aux données passées en paramètre
    */
@@ -3758,8 +4241,8 @@
       this.options = { ...NavButtons.defaultOptions,
         ...options
       };
-      this.dispatch = d3$6.dispatch('select');
-      this.container = d3$6.create('nav').attr('id', this.id).classed(NavButtons.type, true).classed(this.options.style, true);
+      this.dispatch = d3$7.dispatch('select');
+      this.container = d3$7.create('nav').attr('id', this.id).classed(NavButtons.type, true).classed(this.options.style, true);
     }
     /**
      *
@@ -7781,6 +8264,54 @@
     dragEnable: yesdrag
   });
 
+  const FormatFloat = (value, digits) => {
+    digits = digits || 2;
+    return value.toLocaleString('fr-FR', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    });
+  };
+
+  const FormatInt = value => {
+    return parseInt(value).toLocaleString('fr-FR');
+  };
+
+  const FormatPercent = (value, digits) => FormatFloat(value, digits) + '%';
+
+  const d3$6 = Object.assign({}, d3Selection);
+  /**
+   * CLASSE ABSTRAITE SERVANT DE BASE A LA TITRAILLE
+   */
+
+  class ContentTable extends Component {
+    static type = '_Table';
+    /**
+     * CONSTRUCTEUR
+     * @param id
+     */
+
+    constructor(id) {
+      super(id);
+      this.container = d3$6.create('table').attr('id', id).classed(ContentTable.type, true);
+    }
+
+    tr(data = [], options = {
+      tag: 'td'
+    }) {
+      let line = this.container.append('tr');
+      data.forEach(d => {
+        let col = line.append(options.tag);
+        if (d.colspan) col.attr('colspan', d.colspan);
+        if (d.align) col.classed(d.align, true);
+        if (!d.v && d.v !== 0) col.text('-');else if (d.f === 'int') col.text(FormatInt(d.v)).classed('right', true);else if (d.f === 'float') col.text(FormatFloat(d.v, d.digits)).classed('right', true);else if (d.f === 'percent') col.text(FormatPercent(d.v, d.digits)).classed('right', true);else if (d.f === 'color') col.append('span').style('background', d.v);else col.text(d.v);
+      });
+      return this;
+    }
+
+    render() {}
+
+  }
+
   const d3$5 = Object.assign({}, d3Selection, d3Scale, d3Drag);
   /**
    * Renvoie la position d'un node par rapport à l'origine de la page
@@ -7832,17 +8363,16 @@
         this._outerContainer.append('img').classed('close', true).attr('src', 'assets/img/close.svg').on('click', () => this.hide());
       }
 
-      this._text = this._innerContainer.append('section').classed('content', true); //Ajustement du positionnement
+      this._content = this._innerContainer.append('section').classed('content', true); //Ajustement du positionnement
 
       this.offset = new Proxy({}, {
         get: (target, prop) => {
           return target[prop];
         },
         set: (target, prop, value) => {
-          // const coordToCss = {'x': 'left', 'y': 'top'};
-          value = this.containMove(value, prop);
-          this.outerContainer.style(prop == 'x' ? 'left' : 'top', d => value + 'px');
-          target[prop] = value;
+          target[prop] = this._restrainDrag(value, prop); //     console.log(target[prop]);
+
+          this.outerContainer.style(prop == 'x' ? 'left' : 'top', d => target[prop] + 'px');
           return true;
         }
       }); //Drag
@@ -7903,18 +8433,19 @@
      */
 
 
-    containMove(coord, axis = 'x') {
-      if (!this._limits) this._limits = {
+    _restrainDrag(coord, axis = 'x') {
+      const limits = {
         x: [this.options.margins.left, this.containerBounds.width - this.bounds.width - this.options.margins.left - this.options.margins.right],
         y: [this.options.margins.top, this.containerBounds.height - this.bounds.height - this.options.margins.top - this.options.margins.bottom]
-      };
-      if (coord < this._limits[axis][0]) return this._limits[axis][0];else if (coord > this._limits[axis][1]) return this._limits[axis][1];else return coord;
+      }; // console.warn(limits, this.containerBounds.width, this.bounds.width);
+
+      if (coord < limits[axis][0]) return limits[axis][0];else if (coord > limits[axis][1]) return limits[axis][1];else return coord;
     }
 
     reset() {
       this.title('');
 
-      this._text.selectAll('*').remove();
+      this._content.selectAll('*').remove();
 
       return this;
     }
@@ -7937,12 +8468,37 @@
       return this;
     }
 
-    table(data, fn) {
-      this.enqueue(() => new Promise((resolve, reject) => {
-        this._text.append('table').selectAll('tr').data(data).enter().append('tr').html(fn);
+    table() {
+      const table = new ContentTable();
+      table.appendTo(this._content);
+      return table;
+    }
 
-        resolve(this);
-      }));
+    text(text, format = 'text') {
+      if (format === 'html') this._content.append('text').html(text);else this._content.append('p').text(text); //
+
+      return this;
+    }
+
+    add(component) {
+      this._content.append(() => component.outerContainer.node());
+
+      return this;
+    }
+    /**
+     * Affiche la boite (et relance via le proxy this.offset une vérification des coordonnées pour que la boite reste dans le container)
+     * @returns {ContentBox}
+     */
+
+
+    show() {
+      Component.prototype.show.call(this);
+      let {
+        x,
+        y
+      } = this.offset;
+      this.offset.x = x;
+      this.offset.y = y;
       return this;
     }
 
@@ -13248,8 +13804,11 @@
 
 
     _handleZoom(e) {
+      console.log(e.sourceEvent, this._zoomable);
+
       if (e.sourceEvent && this._zoomable || e.sourceEvent === null) {
-        //Transformation
+        console.log('  -> passed'); //Transformation
+
         this.innerContainer.attr('transform', `translate(${this.size.margins.left + e.transform.x} ${this.size.margins.top + e.transform.y}) scale(${e.transform.k})`); //Maintien de l'échelle et disparition des étiquettes
 
         const labels = this.innerContainer.selectAll('text.label');
@@ -13268,63 +13827,76 @@
 
 
     zoomTo(selection) {
-      selection = [selection.node()];
-      this._zoomable = false; //Calcul du zoom
+      this.enqueue(() => new Promise((resolve, reject) => {
+        selection = [selection.node()];
+        this._zoomable = false; //Calcul du zoom
 
-      const getBoundaries = selection => {
-        const bounds = {
-          x1: Infinity,
-          x2: -Infinity,
-          y1: Infinity,
-          y2: -Infinity
+        const getBoundaries = selection => {
+          const bounds = {
+            x1: Infinity,
+            x2: -Infinity,
+            y1: Infinity,
+            y2: -Infinity
+          };
+
+          for (let i = 0; i < selection.length; i++) {
+            bounds.x1 = Math.min(selection[i].getBBox().x, bounds.x1);
+            bounds.y1 = Math.min(selection[i].getBBox().y, bounds.y1);
+            bounds.x2 = Math.max(selection[i].getBBox().x + selection[i].getBBox().width, bounds.x2);
+            bounds.y2 = Math.max(selection[i].getBBox().y + selection[i].getBBox().height, bounds.y2);
+          }
+
+          return bounds;
         };
 
-        for (let i = 0; i < selection.length; i++) {
-          bounds.x1 = Math.min(selection[i].getBBox().x, bounds.x1);
-          bounds.y1 = Math.min(selection[i].getBBox().y, bounds.y1);
-          bounds.x2 = Math.max(selection[i].getBBox().x + selection[i].getBBox().width, bounds.x2);
-          bounds.y2 = Math.max(selection[i].getBBox().y + selection[i].getBBox().height, bounds.y2);
-        }
-
-        return bounds;
-      };
-
-      const bounds = getBoundaries(selection),
-            hscale = this.size.effectiveWidth / (bounds.x2 - bounds.x1),
-            vscale = this.size.effectiveHeight / (bounds.y2 - bounds.y1),
-            scale = Math.min(hscale, vscale),
-            offset = {
-        x: -bounds.x1 * scale + (this.size.effectiveWidth - (bounds.x2 - bounds.x1) * scale) / 2,
-        y: -bounds.y1 * scale + (this.size.effectiveHeight - (bounds.y2 - bounds.y1) * scale) / 2
-      };
-      const finalTransform = d3$2.zoomIdentity.translate(offset.x, offset.y).scale(scale);
-      this.outerContainer.transition().delay(this.options.delay).duration(this.options.duration).call(this.zoom.transform, finalTransform).on('end', () => {
-        getBoundaries(selection); // this.zoom.scaleExtent([finalTransform.k, finalTransform.k*4]);
-
-        this.zoom.scaleExtent([1, finalTransform.k * 4]); //.translateExtent([[newBounds.x1-this.size.margins.left,newBounds.y1],[newBounds.x2+this.size.margins.right,newBounds.y2]]);
-        //.translateExtent([[newBounds.x1,newBounds.y1],[newBounds.x2,newBounds.y2]]);
-
-        this.outerContainer.call(this.zoom, finalTransform);
-        this._zoomable = this.options.zoomable;
-      }); //console.log(this.zoom.transform);
+        const bounds = getBoundaries(selection),
+              hscale = this.size.effectiveWidth / (bounds.x2 - bounds.x1),
+              vscale = this.size.effectiveHeight / (bounds.y2 - bounds.y1),
+              scale = Math.min(hscale, vscale),
+              offset = {
+          x: -bounds.x1 * scale + (this.size.effectiveWidth - (bounds.x2 - bounds.x1) * scale) / 2,
+          y: -bounds.y1 * scale + (this.size.effectiveHeight - (bounds.y2 - bounds.y1) * scale) / 2
+        };
+        const finalTransform = d3$2.zoomIdentity.translate(offset.x, offset.y).scale(scale);
+        this.outerContainer.transition().delay(this.options.delay).duration(this.options.duration).call(this.zoom.transform, finalTransform).on('end', () => {
+          //                    const newBounds = getBoundaries(selection);
+          this.zoom.scaleExtent([1, finalTransform.k * 4]);
+          this.outerContainer.call(this.zoom, finalTransform);
+          this._zoomable = this.options.zoomable;
+          resolve(this);
+        }); //console.log(this.zoom.transform);
+      }));
+      return this;
     }
 
     zoomOut() {
-      let finalTransform = d3$2.zoomIdentity.translate(0, 0).scale(1);
-      this.outerContainer.transition().delay(this.options.delay).duration(this.options.duration).call(this.zoom.transform, finalTransform).on('end', () => {
-        this.zoom.scaleExtent([1, finalTransform.k * 4]);
-        this.outerContainer.call(this.zoom, finalTransform);
-      });
+      this.enqueue(() => new Promise((resolve, reject) => {
+        this._zoomable = false;
+        let finalTransform = d3$2.zoomIdentity.translate(0, 0).scale(1);
+        this.outerContainer.transition().delay(this.options.delay).duration(this.options.duration).call(this.zoom.transform, finalTransform).on('end', () => {
+          this.zoom.scaleExtent([1, finalTransform.k * 4]);
+          this.outerContainer.call(this.zoom, finalTransform);
+          this._zoomable = this.options.zoomable;
+          resolve(this);
+        });
+      }));
       return this;
     }
 
     fadeOutLayers(selector) {
-      this.container.selectAll(`g${selector}`).transition().duration(this.options.duration / 2).style('opacity', 0).on('end', (d, i, n) => d3$2.select(n[i]).style('display', 'none'));
+      //  this.enqueue( () => new Promise((resolve, reject) => {
+      this.container.selectAll(`g${selector}`).transition().duration(this.options.duration / 2).style('opacity', 0).on('end', (d, i, n) => {
+        d3$2.select(n[i]).style('display', 'none'); //   resolve(this);
+      }); //    }));
+
       return this;
     }
 
     fadeInLayers(selector) {
-      this.container.selectAll(`g${selector}`).style('display', 'auto').transition().duration(this.options.duration / 2).style('opacity', 1);
+      // this.enqueue( () => new Promise((resolve, reject) => {
+      this.container.selectAll(`g${selector}`).style('display', 'auto').transition().duration(this.options.duration / 2).style('opacity', 1); //        .on('end', ()=>resolve(this));
+      //  }));
+
       return this;
     }
 
@@ -13570,12 +14142,13 @@
     }
 
     load(file) {
-      this.enqueue(() => new Promise((resolve, reject) => {
+      this.ready = new Promise((resolve, reject) => {
         d3$1.json(file).then(topology => {
           this.geodata = feature(topology, Object.getOwnPropertyNames(topology.objects)[0]).features;
           resolve(this.geodata);
         });
-      }));
+      });
+      this.enqueue(() => this.ready);
       return this;
     }
 
@@ -13655,11 +14228,6 @@
       }));
       return this;
     }
-
-    exportProperties() {
-      this.container.selectAll('path.area').each(d => console.log(d));
-      return this;
-    }
     /**
      * Dessine une carte chloroplethe
      * @param colorFn {Function} : fonction convertissant la valeur en couleur
@@ -13679,8 +14247,9 @@
             data = accessorFn(d);
             color = colorFn(data); //  console.log(data,color,colorFn.domain());
           } catch (error) {
-            data = null;
-            color = this.options.blank || '#fff';
+            data = null; // console.warn(error,d,n[i]);
+
+            color = this.options.blank || '#000';
           }
 
           if (data && this.options.clickable) {
@@ -13814,24 +14383,33 @@
 
     if (insee) {
       mapContainer.fadeOutLayers(`.communes:not(._${insee}`);
-      const candidat = dataCandidats.find(global.candidat); //  console.log(appNavigator.level(1));
+      appNavigator.getLevel(1).select(insee);
+      const candidat = dataCandidats.find(global$1.candidat); //  console.log(appNavigator.level(1));
       //Cas A : Carte et données à charger
 
       if (!mapCommunes[`_${insee}`]) {
+        mapCommunes[`_${insee}`] = new MapLayer(`_${insee}`, {
+          primary: 'COM',
+          secondary: 'NCC',
+          className: 'communes'
+        }).load(`./assets/geomap/${insee}.topojson`);
         const dataCommunes = new DataCollection(`Résultats_${insee}`).load(`./assets/data/${insee}.csv`, {
           primary: 'insee',
+          delimiter: ';',
           mapper: dataMapperCom
         });
         dataCommunes.ready.then(v => {
-          mapCommunes[`_${insee}`] = new MapLayer(`_${insee}`, {
-            primary: 'COM',
-            secondary: 'NCC',
-            className: 'communes'
-          }).appendTo(mapContainer).load(`./assets/geomap/${insee}.topojson`);
-          mapCommunes[`_${insee}`].exportProperties();
-          mapCommunes[`_${insee}`].render().join(dataCommunes, 'insee').fill(colorFactory2(candidat.couleur, dataCommunes.col(candidat.key)), d => d.properties.extra[candidat.key]) // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
-          .labels(dataPrefectures, 'COM', 'NCCENR');
-          mapCommunes[`_${insee}`].dispatch.on('click', appBox.push);
+          mapCommunes[`_${insee}`].ready.then(geodata => {
+            appNavigator.getLevel(2).data(dataCommunes.dataset, {
+              placeHolder: 'Commune',
+              valueKey: 'insee',
+              labelKey: 'nom'
+            });
+            appNavigator.showLevels(3);
+            mapCommunes[`_${insee}`].appendTo(mapContainer).render().join(dataCommunes, 'insee').fill(colorFactory(candidat.couleur, dataCommunes.col(candidat.key)), d => d.properties.extra[candidat.key]) // .fill ( colorFactory( candidat.couleur,[candidat.com_min,candidat.com_max]),  d =>  d.properties.extra[candidat.key])
+            .labels(dataPrefectures, 'COM', 'NCCENR');
+            mapCommunes[`_${insee}`].dispatch.on('click', appBox.push);
+          });
         }); //AJOUTER PROMESSE dataCommunes.ready
         // mapContainer.zoomable(true);
       } //Cas B : carte et données déjà chargés
@@ -13850,6 +14428,7 @@
           .show();*/
     } //Zoom-out: retour carte de France
     else {
+      appNavigator.showLevels(2);
       mapDepartements.deselectAll();
       mapContainer.fadeOutLayers(`.communes`);
       mapContainer.zoomOut();
@@ -13858,16 +14437,12 @@
   /**
    * Renvoie un interplateur données -> couleurs
    * @param baseColor
-   * @param range
+   * @param data
    * @returns {*}
    */
 
 
-  const colorFactory = (baseColor, domain = [0, 100]) => {
-    return d3.scaleLinear().range([baseColor, '#eee']).domain(domain).interpolate(d3.interpolateLab);
-  };
-
-  const colorFactory2 = (baseColor, data) => {
+  const colorFactory = (baseColor, data) => {
     // console.log(data,Math.min(...data),Math.max(...data));
     return d3.scaleLinear().range([baseColor, '#eee']).domain([d3.min(data), d3.max(data)]).interpolate(d3.interpolateLab);
   };
@@ -13911,14 +14486,71 @@
   const appBox = new ContentBox('ContentBox');
 
   appBox.push = function (param) {
-    //console.log(this,param);
-    this.reset().title(param.values.NCCENR) // .table(param.values.values, (d)=> `<td>${d.Prénom} ${d.Nom}</td><td>${d.Mandat}</td><td>${d.Candidat}</td>`)
-    .position(param.event).show();
+    const values = param.values.extra;
+    console.log(dataCandidats.find(1));
+    this.reset().title(param.values.NCCENR).text('Participation: ' + (100 - values.nb_voix13) + '%', {
+      align: 'right'
+    });
+    const table = this.table().tr([{
+      v: 'Candidat',
+      colspan: 2
+    }, {
+      v: 'Suffrages',
+      align: 'right'
+    }, {
+      v: 'Résultat',
+      align: 'right'
+    }], {
+      tag: 'th'
+    });
+    const order = [];
+
+    for (let i = 1; i <= 12; i++) {
+      order.push({
+        i: i,
+        v: values[`nb_voix${i}`]
+      });
+    }
+
+    order.sort((a, b) => a.v > b.v);
+    order.forEach(d => {
+      let candidat = dataCandidats.find(d.i);
+      table.tr([{
+        v: candidat.couleur,
+        f: 'color'
+      }, {
+        v: candidat.nom
+      }, {
+        v: values[`nb_voix${d.i}`],
+        f: 'int'
+      }, {
+        v: values[`voix_${d.i}`],
+        f: 'percent'
+      }]);
+    });
+    this.table().tr([{
+      v: 'Inscrits'
+    }, {
+      v: values.nb_inscrits,
+      f: 'int'
+    }]).tr([{
+      v: 'Votants'
+    }, {
+      v: values.nb_votants,
+      f: 'int'
+    }]).tr([{
+      v: 'Suffrages exprimés'
+    }, {
+      v: values.nb_exprimes,
+      f: 'int'
+    }]);
+    this.position(param.event).show();
+    console.log(values);
   }.bind(appBox);
   /************************************** DONNEES *******************************************/
 
 
-  const global = new Proxy({
+  const global$1 = new Proxy({
     candidat: 1,
     departement: 0
   }, {
@@ -13937,10 +14569,11 @@
             delay: 500
           }); // console.warn(candidat);
 
-          mapDepartements.fill(colorFactory2(candidat.couleur, dataDepartements.col(candidat.key)), d => d.properties.extra[candidat.key]); //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
+          mapDepartements.fill(colorFactory(candidat.couleur, dataDepartements.col(candidat.key)), d => d.properties.extra[candidat.key]); //  .fill ( colorFactory( candidat.couleur,[candidat.dep_min,candidat.dep_max]), d =>  d.properties.extra[candidat.key]);
 
           for (const [key, myMap] of Object.entries(mapCommunes)) {
-            myMap.fill(colorFactory(candidat.couleur, [candidat.dep_min, candidat.dep_max]), d => d.properties.extra[candidat.key]);
+            let dataMap = myMap.geodata.filter(d => d.properties.extra).map(d => d.properties.extra[candidat.key]);
+            myMap.fill(colorFactory(candidat.couleur, dataMap), d => d.properties.extra[candidat.key]);
           } // mapCommunes.forEach( m=> console.log(m));
 
 
@@ -13993,17 +14626,20 @@
   Promise.all([dataDepartements.ready, dataCandidats.ready]).then(() => {
     appTitle.appendTo('mainHeader');
     appBox.appendTo('mainMap');
-    appNavigator.level(0, 'France');
-    appNavigator.level(1, dataDepartements, {
+    appNavigator.setLevel(0, 'label').setLevel(1, 'select').setLevel(2, 'autocomplete');
+    appNavigator.getLevel(0).data('France');
+    appNavigator.getLevel(1).data(dataDepartements, {
       placeHolder: 'Département',
       nestKey: 'reg_nom',
       valueKey: 'insee',
       labelKey: 'nom'
     });
+    appNavigator.getLevel(2).hide(); //  appNavigator.getLevel(2).data(dataDepartements.dataset, {placeHolder: 'Commune', valueKey:'insee', labelKey:'nom'});
+
     appNavigator.appendTo('mainHeader');
     appNavigator.render();
     appNavigator.dispatch.on('change', d => {
-      if (d.index === 0) global.departement = 0;else if (d.index === 1) zoomToDept(d.value);
+      if (d.index === 0) global$1.departement = 0;else if (d.index === 1) zoomToDept(d.value);
     });
     appPanel.appendTo('mainMap');
     appSelector.data(dataCandidats, {
@@ -14015,7 +14651,7 @@
       path: 'assets/img/',
       check: 'check.svg'
     }).appendTo(appPanel).render().select(1);
-    appSelector.dispatch.on('select', d => global.candidat = d.value);
+    appSelector.dispatch.on('select', d => global$1.candidat = d.value);
     /*  appDeptSelector.container
           .append('a')
           .attr('href','#')
@@ -14029,7 +14665,7 @@
          .data( refDepartements.toGroups('reg_nom'), { nested:true, nameKey:'departement', valueKey: 'id' } )
          .dispatch.on('change', zoomToDept);*/
 
-    global.candidat = 1;
+    global$1.candidat = 1;
     /*
     
         setTimeout(()=>{

@@ -4,6 +4,8 @@ import * as d3Selection from 'd3-selection';
 import * as d3Scale from 'd3-scale';
 import * as d3Drag from 'd3-drag';
 import {Component} from "./component";
+import {ContentTable} from "./content.table";
+
 
 const d3=Object.assign({},d3Selection,d3Scale,d3Drag);
 
@@ -52,7 +54,7 @@ class ContentBox extends Component{
 
                 .on('click',()=>this.hide());
         }
-        this._text=this._innerContainer
+        this._content=this._innerContainer
             .append('section')
             .classed('content',true);
 
@@ -62,11 +64,9 @@ class ContentBox extends Component{
                     return target[prop];
                 },
                 set: (target, prop, value)=> {
-                   // const coordToCss = {'x': 'left', 'y': 'top'};
-                    value = this.containMove(value,prop);
-
-                    this.outerContainer.style((prop=='x')?'left':'top', d => value + 'px');
-                    target[prop] = value;
+                    target[prop] = this._restrainDrag(value,prop);
+               //     console.log(target[prop]);
+                    this.outerContainer.style((prop=='x')?'left':'top', d =>  target[prop] + 'px');
                     return true;
                 }} );
         //Drag
@@ -125,20 +125,21 @@ class ContentBox extends Component{
      * @param {String} axis         'x' ou 'y'
      * @returns {String|*}
      */
-    containMove(coord,axis='x'){
-        if (!this._limits) this._limits= {
+    _restrainDrag(coord,axis='x'){
+        const limits= {
             x: [this.options.margins.left, this.containerBounds.width - this.bounds.width - this.options.margins.left - this.options.margins.right],
             y: [this.options.margins.top, this.containerBounds.height - this.bounds.height- this.options.margins.top - this.options.margins.bottom]
         }
-        if (coord < this._limits[axis][0]) return this._limits[axis][0];
-        else if (coord > this._limits[axis][1]) return this._limits[axis][1];
+       // console.warn(limits, this.containerBounds.width, this.bounds.width);
+        if (coord < limits[axis][0]) return limits[axis][0];
+        else if (coord > limits[axis][1]) return limits[axis][1];
         else return coord;
     }
 
 
     reset(){
         this.title('');
-        this._text.selectAll('*').remove();
+        this._content.selectAll('*').remove();
         return this;
     }
 
@@ -160,19 +161,34 @@ class ContentBox extends Component{
     }
 
 
-    table(data, fn){
-        this.enqueue( () => new Promise((resolve, reject) => {
-            const rows = this._text
-                .append('table')
-                .selectAll('tr')
-                .data(data)
-                .enter()
-                .append('tr')
-                .html(fn);
-            resolve(this);
-        }))
-        return this;
+    table(){
+        const table=new ContentTable();
+        table.appendTo(this._content);
+        return table;
+    }
 
+    text(text,format='text'){
+        if (format==='html') this._content.append('text').html(text);
+        else this._content.append('p').text(text);
+        //
+        return this;
+    }
+
+    add(component){
+        this._content.append(()=>component.outerContainer.node());
+        return this;
+    }
+
+    /**
+     * Affiche la boite (et relance via le proxy this.offset une vérification des coordonnées pour que la boite reste dans le container)
+     * @returns {ContentBox}
+     */
+    show(){
+        Component.prototype.show.call(this);
+        let {x,y}=this.offset;
+        this.offset.x=x;
+        this.offset.y=y;
+        return this;
     }
 
 

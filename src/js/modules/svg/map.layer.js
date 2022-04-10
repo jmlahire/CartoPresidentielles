@@ -55,15 +55,14 @@ class MapLayer extends SvgComponent {
     }
 
     load(file){
-
-
-        this.enqueue( () => new Promise((resolve, reject) => {
-            d3.json(file)
-                .then( (topology) => {
-                    this.geodata = topojson.feature(topology, Object.getOwnPropertyNames(topology.objects)[0]).features;
-                    resolve(this.geodata);
-                })
-        }));
+        this.ready=new Promise((resolve, reject) => {
+                d3.json(file)
+                    .then( (topology) => {
+                        this.geodata = topojson.feature(topology, Object.getOwnPropertyNames(topology.objects)[0]).features;
+                        resolve(this.geodata);
+                    })
+            });
+        this.enqueue( () => this.ready );
         return this;
     }
 
@@ -151,12 +150,6 @@ class MapLayer extends SvgComponent {
         return this;
     }
 
-    exportProperties(){
-
-        this.container.selectAll('path.area')
-            .each(d=>console.log(d));
-        return this;
-    }
 
 
     /**
@@ -177,7 +170,8 @@ class MapLayer extends SvgComponent {
                       //  console.log(data,color,colorFn.domain());
                     }catch(error){
                         data=null;
-                        color=this.options.blank || '#fff';
+                      // console.warn(error,d,n[i]);
+                        color=this.options.blank || '#000';
                     }
                     if (data && this.options.clickable) {
                         elt.style('fill', color)
